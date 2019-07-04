@@ -7,8 +7,8 @@ pub trait CsMatExt<N: Num + Copy + Default + Sum> {
     fn col_sum(&self) -> CsVec<N>;
     fn row_sum(&self) -> CsVec<N>;
 
-    fn col_avg(&self) -> CsVec<N>;
-    fn row_avg(&self) -> CsVec<N>;
+   // fn col_avg(&self) -> CsVec<N>;
+   // fn row_avg(&self) -> CsVec<N>;
 
     fn one_vec(size: usize) -> CsVec<N> {
         let mut ind_vec: Vec<usize> = Vec::with_capacity(size);
@@ -33,12 +33,5 @@ impl<N> CsMatExt<N> for CsMat<N> where N: Num + Copy + Default + Sum {
         &row_vec * self
     }
 
-    fn col_avg(&self) -> CsVec<N> {
-        self.col_sum()/Self::one_vec(self.cols()).data.iter().map(|x| *x).sum()
-    }
-
-    fn row_avg(&self) -> CsVec<N> {
-        self.row_sum()/Self::one_vec(self.rows()).data.iter().map(|x| *x).sum()
-    }
 }
 
