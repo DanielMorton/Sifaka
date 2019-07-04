@@ -1,0 +1,10 @@
+[package]
+name = "sifaka"
+version = "0.1.0"
+authors = ["dmorton"]
+edition = "2018"
+
+[dependencies]
+csv = "1.0.7"
+num-traits = "0.2"
+sprs = "0.6.4"
