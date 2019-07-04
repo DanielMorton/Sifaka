@@ -6,5 +6,6 @@ edition = "2018"
 
 [dependencies]
 csv = "1.0.7"
+ndarray = "0.12.1"
 num-traits = "0.2"
 sprs = "0.6.4"
