@@ -30,7 +30,7 @@ impl<N> CsMatExt<N> for CsMat<N> where N: Num + Copy + Default + Sum {
     fn row_sum(&self) -> CsVec<N> {
         let rows = self.cols();
         let row_vec = Self::one_vec(rows);
-        &row_vec * self
+        &self.transpose_view() * &row_vec
     }
 
 }
