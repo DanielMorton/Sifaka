@@ -2,38 +2,40 @@ use sprs::{CsMat, CsVec};
 use num_traits::identities::One;
 use num_traits::Num;
 use std::iter::Sum;
-use ndarray::Array1;
+use crate::CsVecExt;
 
 pub trait CsMatExt<N: Num + Copy + Default + Sum> {
-    fn col_sum(&self) -> Array1<N>;
-    fn row_sum(&self) -> Array1<N>;
+    fn outer_sum(&self) -> CsVec<N>;
+    fn inner_sum(&self) -> CsVec<N>;
+
+    fn col_sum(&self) -> CsVec<N>;
+    fn row_sum(&self) -> CsVec<N>;
 
    // fn col_avg(&self) -> CsVec<N>;
    // fn row_avg(&self) -> CsVec<N>;
-
-    fn one_vec(size: usize) -> Array1<N> {
-        let mut ind_vec: Vec<usize> = Vec::with_capacity(size);
-        //let one_vec =
-        Array1::from_vec(vec![One::one(); size])
-        //for i in 0..size {
-       //     ind_vec.push(i);
-       // }
-       // return CsVec::new(size, ind_vec, one_vec);
-    }
 }
 
 impl<N> CsMatExt<N> for CsMat<N> where N: Num + Copy + Default + Sum {
-    fn col_sum(&self) -> Array1<N> {
-        let cols = self.cols();
-        let col_vec = Self::one_vec(cols);
-        self * &col_vec
+    fn outer_sum(&self) -> CsVec<N> {
+        let mut ind_vec: Vec<usize> = Vec::new();
+        let mut sum_vec: Vec<N> = Vec::new();
+        for (ind, vec) in self.outer_iterator().enumerate() {
+            ind_vec.push( ind);
+            sum_vec.push(vec.sum());
+        }
+        CsVec::new(self.cols(), ind_vec, sum_vec)
     }
 
-    fn row_sum(&self) -> Array1<N> {
-        let rows = self.cols();
-        let row_vec = Self::one_vec(rows);
-        &self.transpose_view() * &row_vec
+    fn inner_sum(&self) -> CsVec<N> {
+        self.to_other_storage().outer_sum()
     }
 
+    fn col_sum(&self) -> CsVec<N> {
+        if self.is_csc() {self.outer_sum()} else {self.inner_sum()}
+    }
+
+    fn row_sum(&self) -> CsVec<N> {
+        if self.is_csr() {self.outer_sum()} else {self.inner_sum()}
+    }
 }
 

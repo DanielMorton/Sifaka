@@ -7,7 +7,7 @@ fn main() {
     let a = CsMat::new_csc((3, 3),
                            vec![0, 2, 4, 5],
                            vec![0, 1, 0, 2, 2],
-                           vec![1, 2, 3, 4, 5]);// as CsMat<i32>;
+                           vec![1, 2, 3, 4, 5]);
 
     let eye = CsMat::eye(3);
     let _b = &a * &eye;
