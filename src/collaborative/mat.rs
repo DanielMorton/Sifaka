@@ -1,65 +1,79 @@
-use sprs::{CsMat, CsVec};
-use num_traits::identities::One;
-use num_traits::Num;
 use std::iter::Sum;
+use std::ops::Deref;
+
+use num_traits::Num;
+use sprs::{CsMatBase, CsVecI};
+use sprs::SpIndex;
+
 use crate::CsVecExt;
 
-pub trait CsMatExt<N: Num + Copy + Default + Sum> {
-    fn outer_sum(&self) -> CsVec<N>;
-    fn inner_sum(&self) -> CsVec<N>;
+pub trait CsMatExt<N: Num + Copy + Default + Sum, I> {
+    fn outer_sum(&self) -> CsVecI<N, I>;
+    fn inner_sum(&self) -> CsVecI<N, I>;
 
-    fn col_sum(&self) -> CsVec<N>;
-    fn row_sum(&self) -> CsVec<N>;
+    fn col_sum(&self) -> CsVecI<N, I>;
+    fn row_sum(&self) -> CsVecI<N, I>;
 
-    fn outer_avg(&self) -> CsVec<N>;
-    fn inner_avg(&self) -> CsVec<N>;
+    fn outer_avg(&self) ->CsVecI<N, I>;
+    fn inner_avg(&self) -> CsVecI<N, I>;
 
-    fn col_avg(&self) -> CsVec<N>;
-    fn row_avg(&self) -> CsVec<N>;
+    fn col_avg(&self) -> CsVecI<N, I>;
+    fn row_avg(&self) -> CsVecI<N, I>;
 }
 
-impl<N> CsMatExt<N> for CsMat<N> where N: Num + Copy + Default + Sum {
-    fn outer_sum(&self) -> CsVec<N> {
-        let mut ind_vec: Vec<usize> = Vec::new();
+impl<N, I, IS, DS> CsMatExt<N, I> for CsMatBase<N, I, IS, IS, DS>
+    where
+        I: SpIndex + From<usize>,
+        IS: Deref<Target = [I]>,
+        DS: Deref<Target = [N]>,
+        N: Num + Copy + Default + Sum {
+    fn outer_sum(&self) -> CsVecI<N, I> {
+        let mut ind_vec: Vec<I> = Vec::new();
         let mut sum_vec: Vec<N> = Vec::new();
         for (ind, vec) in self.outer_iterator().enumerate() {
-            ind_vec.push( ind);
-            sum_vec.push(vec.sum());
+            let v = vec.sum();
+            if v != N::zero() {
+                ind_vec.push( From::from(ind));
+                sum_vec.push(v);
+            }
         }
-        CsVec::new(self.cols(), ind_vec, sum_vec)
+        CsVecI::new(self.cols(), ind_vec, sum_vec)
     }
 
-    fn inner_sum(&self) -> CsVec<N> {
+    fn inner_sum(&self) -> CsVecI<N, I> {
         self.to_other_storage().outer_sum()
     }
 
-    fn col_sum(&self) -> CsVec<N> {
+    fn col_sum(&self) -> CsVecI<N, I> {
         if self.is_csc() {self.outer_sum()} else {self.inner_sum()}
     }
 
-    fn row_sum(&self) -> CsVec<N> {
+    fn row_sum(&self) -> CsVecI<N, I> {
         if self.is_csr() {self.outer_sum()} else {self.inner_sum()}
     }
 
-    fn outer_avg(&self) -> CsVec<N> {
-        let mut ind_vec: Vec<usize> = Vec::new();
+    fn outer_avg(&self) -> CsVecI<N, I> {
+        let mut ind_vec: Vec<I> = Vec::new();
         let mut avg_vec: Vec<N> = Vec::new();
         for (ind, vec) in self.outer_iterator().enumerate() {
-            ind_vec.push( ind);
-            avg_vec.push(vec.avg());
+            let v = vec.avg();
+            if v != N::zero() {
+                ind_vec.push( From::from(ind));
+                avg_vec.push(vec.avg());
+            }
         }
-        CsVec::new(self.cols(), ind_vec, avg_vec)
+        CsVecI::new(self.cols(), ind_vec, avg_vec)
     }
 
-    fn inner_avg(&self) -> CsVec<N> {
+    fn inner_avg(&self) -> CsVecI<N, I> {
         self.to_other_storage().outer_avg()
     }
 
-    fn col_avg(&self) -> CsVec<N> {
+    fn col_avg(&self) -> CsVecI<N, I> {
         if self.is_csc() {self.outer_avg()} else {self.inner_avg()}
     }
 
-    fn row_avg(&self) -> CsVec<N> {
+    fn row_avg(&self) -> CsVecI<N, I> {
         if self.is_csr() {self.outer_avg()} else {self.inner_avg()}
     }
 }
