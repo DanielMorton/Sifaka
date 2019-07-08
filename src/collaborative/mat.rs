@@ -2,12 +2,12 @@ use std::iter::Sum;
 use std::ops::Deref;
 
 use num_traits::Num;
-use sprs::{CsMatBase, CsVecI};
+use sprs::{CsMatBase, CsVecI, CsMatI};
 use sprs::SpIndex;
 
-use crate::CsVecExt;
+use crate::CsVecBaseExt;
 
-pub trait CsMatExt<N: Num + Copy + Default + Sum, I> {
+pub trait CsMatBaseExt<N, I> {
     fn outer_sum(&self) -> CsVecI<N, I>;
     fn inner_sum(&self) -> CsVecI<N, I>;
 
@@ -21,7 +21,7 @@ pub trait CsMatExt<N: Num + Copy + Default + Sum, I> {
     fn row_avg(&self) -> CsVecI<N, I>;
 }
 
-impl<N, I, IS, DS> CsMatExt<N, I> for CsMatBase<N, I, IS, IS, DS>
+impl<N, I, IS, DS> CsMatBaseExt<N, I> for CsMatBase<N, I, IS, IS, DS>
     where
         I: SpIndex + From<usize>,
         IS: Deref<Target = [I]>,
@@ -78,3 +78,17 @@ impl<N, I, IS, DS> CsMatExt<N, I> for CsMatBase<N, I, IS, IS, DS>
     }
 }
 
+trait CsMatIExt {
+    fn outer_center(&self) -> Self;
+    fn inner_center(&self) -> Self;
+    fn col_center(&self) -> Self;
+    fn row_center(&self) -> Self;
+}
+
+/*impl<N, I> CsMatIExt for CsMatI<N, I> where
+    I: SpIndex + From<usize>,
+    N: Num + Copy + Default + Sum {
+    fn outer_center(&self) -> Self {
+
+    }
+}*/

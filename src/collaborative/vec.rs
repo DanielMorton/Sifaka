@@ -1,18 +1,17 @@
 use std::iter::Sum;
 use std::ops::Deref;
 
-use num_traits::identities::One;
 use num_traits::Num;
-use sprs::CsVecBase;
+use sprs::{CsVecBase, CsVecI};
 use sprs::SpIndex;
 
-pub trait CsVecExt<N> {
+pub trait CsVecBaseExt<N> {
     fn sum(&self) -> N;
     fn length(&self) -> usize;
     fn avg(&self) -> N;
 }
 
-impl<N, I, IS, DS> CsVecExt<N> for CsVecBase<IS, DS>
+impl<N, I, IS, DS> CsVecBaseExt<N> for CsVecBase<IS, DS>
 where  I: SpIndex,
        IS: Deref<Target = [I]>,
        DS: Deref<Target = [N]>,
@@ -26,6 +25,21 @@ where  I: SpIndex,
     }
 
     fn avg(&self) -> N {
-        self.sum()/vec![One::one(); self.length()].iter().map(|x| *x).sum()
+        self.sum()/vec![N::one(); self.length()].iter().map(|x| *x).sum()
+    }
+}
+
+pub trait CsVecIExt {
+    fn center(&self) -> Self;
+}
+
+
+impl<N, I> CsVecIExt for CsVecI<N, I>
+    where I: SpIndex,
+          N: Num + Copy + Sum {
+    fn center(&self) -> Self {
+        let avg = self.avg();
+        CsVecI::new(self.dim(), self.indices().to_vec(),
+                    self.data().iter().map(|x| *x - avg).collect())
     }
 }
