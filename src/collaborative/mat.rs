@@ -5,9 +5,13 @@ use num_traits::Num;
 use sprs::{CsMatBase, CsVecI, CsMatI};
 use sprs::SpIndex;
 
-use crate::CsVecBaseExt;
+use super::CsVecBaseExt;
 
-pub trait CsMatBaseExt<N, I> {
+pub trait CsMatBaseExt<N, I>
+    where I:SpIndex {
+
+    fn ip_vec(&self) -> Vec<I>;
+    fn ind_vec(&self) -> Vec<I>;
     fn outer_sum(&self) -> CsVecI<N, I>;
     fn inner_sum(&self) -> CsVecI<N, I>;
 
@@ -19,6 +23,8 @@ pub trait CsMatBaseExt<N, I> {
 
     fn col_avg(&self) -> CsVecI<N, I>;
     fn row_avg(&self) -> CsVecI<N, I>;
+
+    fn outer_center(&self) -> CsMatI<N, I>;
 }
 
 impl<N, I, IS, DS> CsMatBaseExt<N, I> for CsMatBase<N, I, IS, IS, DS>
@@ -27,6 +33,15 @@ impl<N, I, IS, DS> CsMatBaseExt<N, I> for CsMatBase<N, I, IS, IS, DS>
         IS: Deref<Target = [I]>,
         DS: Deref<Target = [N]>,
         N: Num + Copy + Default + Sum {
+
+    fn ip_vec(&self) -> Vec<I> {
+        self.indptr().to_vec()
+    }
+
+    fn ind_vec(&self) -> Vec<I> {
+        self.indices().to_vec()
+    }
+
     fn outer_sum(&self) -> CsVecI<N, I> {
         let mut ind_vec: Vec<I> = Vec::new();
         let mut sum_vec: Vec<N> = Vec::new();
@@ -76,19 +91,13 @@ impl<N, I, IS, DS> CsMatBaseExt<N, I> for CsMatBase<N, I, IS, IS, DS>
     fn row_avg(&self) -> CsVecI<N, I> {
         if self.is_csr() {self.outer_avg()} else {self.inner_avg()}
     }
-}
 
-trait CsMatIExt {
-    fn outer_center(&self) -> Self;
-    fn inner_center(&self) -> Self;
-    fn col_center(&self) -> Self;
-    fn row_center(&self) -> Self;
-}
-
-/*impl<N, I> CsMatIExt for CsMatI<N, I> where
-    I: SpIndex + From<usize>,
-    N: Num + Copy + Default + Sum {
-    fn outer_center(&self) -> Self {
-
+    fn outer_center(&self) -> CsMatI<N, I> {
+        let mut data: Vec<N> = Vec::new();
+        for (_, vec) in self.outer_iterator().enumerate() {
+            data.append(&mut vec.center().data().to_vec());
+        }
+        CsMatI::new(self.shape(), self.ip_vec(), self.ind_vec(), data)
     }
-}*/
+
+}
