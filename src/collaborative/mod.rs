@@ -3,4 +3,4 @@ pub mod user;
 pub mod vec;
 
 pub use mat::CsMatBaseExt;
-pub use vec::CsVecBaseExt;
+pub use vec::{CsFloatVec, CsVecBaseExt};

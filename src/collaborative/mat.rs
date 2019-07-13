@@ -1,11 +1,11 @@
 use std::iter::Sum;
 use std::ops::Deref;
 
-use num_traits::Num;
+use num_traits::{Float, Num};
 use sprs::{CsMatBase, CsVecI, CsMatI};
 use sprs::SpIndex;
 
-use super::CsVecBaseExt;
+use super::{CsFloatVec, CsVecBaseExt};
 
 pub trait CsMatBaseExt<N, I>
     where I:SpIndex {
@@ -59,6 +59,27 @@ impl<N, I, IS, DS> CsMatBaseExt<N, I> for CsMatBase<N, I, IS, IS, DS>
         CsVecI::new(self.cols(), ind_vec, sum_vec)
     }
 
+    fn outer_avg(&self) -> CsVecI<N, I> {
+        let mut ind_vec: Vec<I> = Vec::new();
+        let mut avg_vec: Vec<N> = Vec::new();
+        for (ind, vec) in self.outer_iterator().enumerate() {
+            let v = vec.avg();
+            if v != N::zero() {
+                ind_vec.push( From::from(ind));
+                avg_vec.push(v);
+            }
+        }
+        CsVecI::new(self.cols(), ind_vec, avg_vec)
+    }
+
+    fn outer_center(&self) -> CsMatI<N, I> {
+        let mut data: Vec<N> = Vec::new();
+        for (_, vec) in self.outer_iterator().enumerate() {
+            data.append(&mut vec.center().data().to_vec());
+        }
+        CsMatI::new(self.shape(), self.ip_vec(), self.ind_vec(), data)
+    }
+
     fn inner_sum(&self) -> CsVecI<N, I> {
         self.to_other_storage().outer_sum()
     }
@@ -71,18 +92,6 @@ impl<N, I, IS, DS> CsMatBaseExt<N, I> for CsMatBase<N, I, IS, IS, DS>
         if self.is_csr() {self.outer_sum()} else {self.inner_sum()}
     }
 
-    fn outer_avg(&self) -> CsVecI<N, I> {
-        let mut ind_vec: Vec<I> = Vec::new();
-        let mut avg_vec: Vec<N> = Vec::new();
-        for (ind, vec) in self.outer_iterator().enumerate() {
-            let v = vec.avg();
-            if v != N::zero() {
-                ind_vec.push( From::from(ind));
-                avg_vec.push(vec.avg());
-            }
-        }
-        CsVecI::new(self.cols(), ind_vec, avg_vec)
-    }
 
     fn inner_avg(&self) -> CsVecI<N, I> {
         self.to_other_storage().outer_avg()
@@ -96,13 +105,7 @@ impl<N, I, IS, DS> CsMatBaseExt<N, I> for CsMatBase<N, I, IS, IS, DS>
         if self.is_csr() {self.outer_avg()} else {self.inner_avg()}
     }
 
-    fn outer_center(&self) -> CsMatI<N, I> {
-        let mut data: Vec<N> = Vec::new();
-        for (_, vec) in self.outer_iterator().enumerate() {
-            data.append(&mut vec.center().data().to_vec());
-        }
-        CsMatI::new(self.shape(), self.ip_vec(), self.ind_vec(), data)
-    }
+
 
     fn inner_center(&self) -> CsMatI<N, I> { self.to_other_storage().outer_center() }
 
@@ -114,4 +117,29 @@ impl<N, I, IS, DS> CsMatBaseExt<N, I> for CsMatBase<N, I, IS, IS, DS>
         if self.is_csr() {self.outer_center()} else {self.inner_center()}
     }
 
+}
+
+pub trait CsFloatMat<N, I> {
+    fn outer_norm(&self) -> CsVecI<N, I>;
+}
+
+impl<N, I, IS, DS> CsFloatMat<N, I> for CsMatBase<N, I, IS, IS, DS>
+    where
+        I: SpIndex + From<usize>,
+        IS: Deref<Target = [I]>,
+        DS: Deref<Target = [N]>,
+        N: Num + Copy + Default + Sum + Float {
+
+    fn outer_norm(&self) -> CsVecI<N, I> {
+        let mut ind_vec: Vec<I> = Vec::new();
+        let mut norm_vec: Vec<N> = Vec::new();
+        for (ind, vec) in self.outer_iterator().enumerate() {
+            let v = vec.l2_norm();
+            if v != N::zero() {
+                ind_vec.push( From::from(ind));
+                norm_vec.push(v);
+            }
+        }
+        CsVecI::new(self.cols(), ind_vec, norm_vec)
+    }
 }
