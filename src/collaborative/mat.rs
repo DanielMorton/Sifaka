@@ -25,6 +25,10 @@ pub trait CsMatBaseExt<N, I>
     fn row_avg(&self) -> CsVecI<N, I>;
 
     fn outer_center(&self) -> CsMatI<N, I>;
+    fn inner_center(&self) -> CsMatI<N, I>;
+
+    fn col_center(&self) -> CsMatI<N, I>;
+    fn row_center(&self) -> CsMatI<N, I>;
 }
 
 impl<N, I, IS, DS> CsMatBaseExt<N, I> for CsMatBase<N, I, IS, IS, DS>
@@ -98,6 +102,16 @@ impl<N, I, IS, DS> CsMatBaseExt<N, I> for CsMatBase<N, I, IS, IS, DS>
             data.append(&mut vec.center().data().to_vec());
         }
         CsMatI::new(self.shape(), self.ip_vec(), self.ind_vec(), data)
+    }
+
+    fn inner_center(&self) -> CsMatI<N, I> { self.to_other_storage().outer_center() }
+
+    fn col_center(&self) -> CsMatI<N, I> {
+        if self.is_csc() {self.outer_center()} else {self.inner_center()}
+    }
+
+    fn row_center(&self) -> CsMatI<N, I> {
+        if self.is_csr() {self.outer_center()} else {self.inner_center()}
     }
 
 }
