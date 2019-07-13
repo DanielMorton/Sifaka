@@ -1,5 +1,4 @@
 mod collaborative;
-use collaborative::CsMatBaseExt;
 use collaborative::CsVecBaseExt;
 use collaborative::{SimType, correlation};
 
@@ -18,6 +17,5 @@ fn main() {
     println!("{}", x.sum());
     println!("{}", x.avg());
 //    println!("{}", a.row_avg().sum());
-    let a_t = a.clone().transpose_into();
-    let a_cor = correlation(&a, SimType::ItemItem);
+    let _a_cor = correlation(&a, SimType::ItemItem);
 }
