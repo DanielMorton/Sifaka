@@ -8,13 +8,8 @@ use sprs::SpIndex;
 
 use super::{CsFloatVec, CsVecBaseExt};
 
-pub trait CsMatBaseExt<N, I>
+trait CsMatBaseHelp<N, I>
     where I:SpIndex {
-
-    fn ip_vec(&self) -> Vec<I>;
-    fn ind_vec(&self) -> Vec<I>;
-    fn data_vec(&self) -> Vec<N>;
-
     fn outer_sum(&self) -> CsVecI<N, I>;
     fn outer_avg(&self) ->CsVecI<N, I>;
     fn outer_center(&self) -> CsMatI<N, I>;
@@ -24,39 +19,14 @@ pub trait CsMatBaseExt<N, I>
     fn inner_avg(&self) -> CsVecI<N, I>;
     fn inner_center(&self) -> CsMatI<N, I>;
     fn inner_l1_norm(&self) -> CsVecI<N, I>;
-
-    fn col_sum(&self) -> CsVecI<N, I>;
-    fn row_sum(&self) -> CsVecI<N, I>;
-
-    fn col_avg(&self) -> CsVecI<N, I>;
-    fn row_avg(&self) -> CsVecI<N, I>;
-
-    fn col_center(&self) -> CsMatI<N, I>;
-    fn row_center(&self) -> CsMatI<N, I>;
-
-    fn col_l1_norm(&self) -> CsVecI<N, I>;
-    fn row_l1_norm(&self) -> CsVecI<N, I>;
 }
 
-impl<N, I, IS, DS> CsMatBaseExt<N, I> for CsMatBase<N, I, IS, IS, DS>
+impl<N, I, IS, DS> CsMatBaseHelp<N, I> for CsMatBase<N, I, IS, IS, DS>
     where
         I: SpIndex + From<usize>,
         IS: Deref<Target = [I]>,
         DS: Deref<Target = [N]>,
         N: Num + Copy + Default + Sum + Real {
-
-    fn ip_vec(&self) -> Vec<I> {
-        self.indptr().to_vec()
-    }
-
-    fn ind_vec(&self) -> Vec<I> {
-        self.indices().to_vec()
-    }
-
-    fn data_vec(&self) -> Vec<N> {
-        self.data().to_vec()
-    }
-
     fn outer_sum(&self) -> CsVecI<N, I> {
         let mut ind_vec: Vec<I> = Vec::new();
         let mut sum_vec: Vec<N> = Vec::new();
@@ -111,6 +81,46 @@ impl<N, I, IS, DS> CsMatBaseExt<N, I> for CsMatBase<N, I, IS, IS, DS>
     fn inner_center(&self) -> CsMatI<N, I> { self.to_other_storage().outer_center() }
 
     fn inner_l1_norm(&self) -> CsVecI<N, I> { self.to_other_storage().outer_l1_norm() }
+}
+
+pub trait CsMatBaseExt<N, I>
+    where I:SpIndex {
+
+    fn ip_vec(&self) -> Vec<I>;
+    fn ind_vec(&self) -> Vec<I>;
+    fn data_vec(&self) -> Vec<N>;
+
+    fn col_sum(&self) -> CsVecI<N, I>;
+    fn row_sum(&self) -> CsVecI<N, I>;
+
+    fn col_avg(&self) -> CsVecI<N, I>;
+    fn row_avg(&self) -> CsVecI<N, I>;
+
+    fn col_center(&self) -> CsMatI<N, I>;
+    fn row_center(&self) -> CsMatI<N, I>;
+
+    fn col_l1_norm(&self) -> CsVecI<N, I>;
+    fn row_l1_norm(&self) -> CsVecI<N, I>;
+}
+
+impl<N, I, IS, DS> CsMatBaseExt<N, I> for CsMatBase<N, I, IS, IS, DS>
+    where
+        I: SpIndex + From<usize>,
+        IS: Deref<Target = [I]>,
+        DS: Deref<Target = [N]>,
+        N: Num + Copy + Default + Sum + Real {
+
+    fn ip_vec(&self) -> Vec<I> {
+        self.indptr().to_vec()
+    }
+
+    fn ind_vec(&self) -> Vec<I> {
+        self.indices().to_vec()
+    }
+
+    fn data_vec(&self) -> Vec<N> {
+        self.data().to_vec()
+    }
 
     fn col_sum(&self) -> CsVecI<N, I> {
         if self.is_csc() {self.outer_sum()} else {self.inner_sum()}
