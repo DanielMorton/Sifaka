@@ -8,13 +8,14 @@ use sprs::{CsVecBase, CsVecI};
 use sprs::SpIndex;
 
 pub trait CsVecBaseExt<N, I> {
+    fn length(&self) -> usize;
     fn ind_iter(&self) -> Iter<I>;
     fn data_iter(&self) -> Iter<N>;
 
     fn ind_vec(&self) -> Vec<I>;
     fn data_vec(&self) -> Vec<N>;
+    fn data_fold<T>(&self, init: N, f: T) -> N where T: Fn(N, &N) -> N;
     fn sum(&self) -> N;
-    fn length(&self) -> usize;
     fn avg(&self) -> N;
     fn center(&self) -> CsVecI<N, I>;
     fn l1_norm(&self) -> N;
@@ -26,29 +27,25 @@ where  I: SpIndex,
        DS: Deref<Target = [N]>,
        N: Num + Copy + Sum + Real {
 
-    fn ind_iter(&self) -> Iter<I> {
-        self.indices().iter()
-    }
+    fn length(&self) -> usize { self.indices().len() }
 
-    fn data_iter(&self) -> Iter<N> {
-        self.data().iter()
-    }
+    fn ind_iter(&self) -> Iter<I> { self.indices().iter() }
 
-    fn ind_vec(&self) -> Vec<I> {
-        self.indices().to_vec()
-    }
+    fn data_iter(&self) -> Iter<N> { self.data().iter() }
 
-    fn data_vec(&self) -> Vec<N> {
-        self.data().to_vec()
+    fn ind_vec(&self) -> Vec<I> { self.indices().to_vec() }
+
+    fn data_vec(&self) -> Vec<N> { self.data().to_vec() }
+
+    fn data_fold<T>(&self, init: N, f: T) -> N where T: Fn(N, &N) -> N {
+        self.data_iter().fold(init, f)
     }
 
     fn sum(&self) -> N {
-        self.data_iter().fold(N::zero(), |s, &x| s + x)
+        let s = |s: N, &x: &N| s + x;
+        self.data_fold(N::zero(), s)
     }
 
-    fn length(&self) -> usize {
-        self.indices().len()
-    }
 
     fn avg(&self) -> N {
         if self.length() != 0 {
@@ -64,7 +61,7 @@ where  I: SpIndex,
     }
 
     fn l1_norm(&self) -> N {
-        self.data_iter().fold(N::zero(), |s, &x| s + x.abs())
+        self.data_fold(N::zero(), |s, &x| s + x.abs())
     }
 }
 
@@ -79,7 +76,6 @@ impl<N, I, IS, DS> CsFloatVec<N, I> for CsVecBase<IS, DS>
            N: Num + Copy + Sum + Float {
 
     fn l2_norm(&self) -> N  {
-        self.map(|x| *x * *x).data_iter()
-            .fold(N::zero(), |s, &x| s + x).sqrt()
+        self.data_fold(N::zero(), |s, &x| s + x * x).sqrt()
     }
 }
