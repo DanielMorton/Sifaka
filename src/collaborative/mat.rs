@@ -27,6 +27,7 @@ impl<N, I, IS, DS> CsMatBaseHelp<N, I> for CsMatBase<N, I, IS, IS, DS>
         IS: Deref<Target = [I]>,
         DS: Deref<Target = [N]>,
         N: Num + Copy + Default + Sum + Real {
+
     fn outer_sum(&self) -> CsVecI<N, I> {
         let mut ind_vec: Vec<I> = Vec::new();
         let mut sum_vec: Vec<N> = Vec::new();
@@ -110,17 +111,11 @@ impl<N, I, IS, DS> CsMatBaseExt<N, I> for CsMatBase<N, I, IS, IS, DS>
         DS: Deref<Target = [N]>,
         N: Num + Copy + Default + Sum + Real {
 
-    fn ip_vec(&self) -> Vec<I> {
-        self.indptr().to_vec()
-    }
+    fn ip_vec(&self) -> Vec<I> { self.indptr().to_vec() }
 
-    fn ind_vec(&self) -> Vec<I> {
-        self.indices().to_vec()
-    }
+    fn ind_vec(&self) -> Vec<I> { self.indices().to_vec() }
 
-    fn data_vec(&self) -> Vec<N> {
-        self.data().to_vec()
-    }
+    fn data_vec(&self) -> Vec<N> { self.data().to_vec() }
 
     fn col_sum(&self) -> CsVecI<N, I> {
         if self.is_csc() {self.outer_sum()} else {self.inner_sum()}
