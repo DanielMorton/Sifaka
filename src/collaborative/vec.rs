@@ -1,8 +1,8 @@
 use std::iter::Sum;
 use std::ops::Deref;
+use std::slice::Iter;
 
 use num_traits::{Float, Num};
-use std::slice::Iter;
 use sprs::{CsVecBase, CsVecI};
 use sprs::SpIndex;
 

@@ -2,7 +2,7 @@ use std::iter::Sum;
 use std::ops::Deref;
 
 use num_traits::{Float, Num};
-use sprs::{CsMatBase, CsVecI, CsMatI};
+use sprs::{CsMatBase, CsMatI, CsVecI};
 use sprs::SpIndex;
 
 use super::{CsFloatVec, CsVecBaseExt};

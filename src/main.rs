@@ -1,8 +1,10 @@
-mod collaborative;
-use collaborative::CsVecBaseExt;
-use collaborative::{SimType, correlation};
-
 use sprs::{CsMatI, CsVec};
+
+use collaborative::{correlation, SimType};
+use collaborative::CsVecBaseExt;
+
+mod collaborative;
+
 fn main() {
     let a = CsMatI::new_csc((3, 3),
                            vec![0u32, 2u32, 4u32, 5u32],
