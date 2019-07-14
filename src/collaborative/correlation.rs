@@ -19,7 +19,7 @@ pub fn correlation<N, I>(user_item: &CsMatI<N, I>, sim: SimType) -> CsMatI<N, I>
     where I: SpIndex + TryFrom<usize>,
           N: Num + Copy + Default + Sum + Float {
     match sim {
-        SimType::UserUser=> &user_item.view() * &user_item.transpose_view(),
-        SimType::ItemItem => &user_item.transpose_view() * &user_item.view()
+        UserUser=> &user_item.view() * &user_item.transpose_view(),
+        ItemItem => &user_item.transpose_view() * &user_item.view()
     }
 }
