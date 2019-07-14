@@ -147,11 +147,11 @@ impl<N, I, IS, DS> CsMatBaseExt<N, I> for CsMatBase<N, I, IS, IS, DS>
 }
 
 pub trait CsFloatMat<N, I> {
-    fn outer_norm(&self) -> CsVecI<N, I>;
-    fn inner_norm(&self) -> CsVecI<N, I>;
+    fn outer_l2_norm(&self) -> CsVecI<N, I>;
+    fn inner_l2_norm(&self) -> CsVecI<N, I>;
 
-    fn col_norm(&self) -> CsVecI<N, I>;
-    fn row_norm(&self) -> CsVecI<N, I>;
+    fn col_l2_norm(&self) -> CsVecI<N, I>;
+    fn row_l2_norm(&self) -> CsVecI<N, I>;
 }
 
 impl<N, I, IS, DS> CsFloatMat<N, I> for CsMatBase<N, I, IS, IS, DS>
@@ -161,7 +161,7 @@ impl<N, I, IS, DS> CsFloatMat<N, I> for CsMatBase<N, I, IS, IS, DS>
         DS: Deref<Target = [N]>,
         N: Num + Copy + Default + Sum + Float {
 
-    fn outer_norm(&self) -> CsVecI<N, I> {
+    fn outer_l2_norm(&self) -> CsVecI<N, I> {
         let mut ind_vec: Vec<I> = Vec::new();
         let mut norm_vec: Vec<N> = Vec::new();
         for (ind, vec) in self.outer_iterator().enumerate() {
@@ -174,15 +174,15 @@ impl<N, I, IS, DS> CsFloatMat<N, I> for CsMatBase<N, I, IS, IS, DS>
         CsVecI::new(self.cols(), ind_vec, norm_vec)
     }
 
-    fn inner_norm(&self) -> CsVecI<N, I> {
-        self.to_other_storage().outer_norm()
+    fn inner_l2_norm(&self) -> CsVecI<N, I> {
+        self.to_other_storage().outer_l2_norm()
     }
 
-    fn col_norm(&self) -> CsVecI<N, I> {
-        if self.is_csc() {self.outer_norm()} else {self.inner_norm()}
+    fn col_l2_norm(&self) -> CsVecI<N, I> {
+        if self.is_csc() {self.outer_l2_norm()} else {self.inner_l2_norm()}
     }
 
-    fn row_norm(&self) -> CsVecI<N, I> {
-        if self.is_csr() {self.outer_norm()} else {self.inner_norm()}
+    fn row_l2_norm(&self) -> CsVecI<N, I> {
+        if self.is_csr() {self.outer_l2_norm()} else {self.inner_l2_norm()}
     }
 }
