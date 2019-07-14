@@ -13,7 +13,6 @@ pub trait CsVecBaseExt<N, I> {
 
     fn ind_vec(&self) -> Vec<I>;
     fn data_vec(&self) -> Vec<N>;
-    fn data_map<T>(&self, f: T) -> Vec<N> where T: Fn(&N) -> N;
     fn sum(&self) -> N;
     fn length(&self) -> usize;
     fn avg(&self) -> N;
@@ -43,10 +42,6 @@ where  I: SpIndex,
         self.data().to_vec()
     }
 
-    fn data_map<T>(&self, f: T) -> Vec<N> where T: Fn(&N) -> N {
-        self.data_iter().map(|x| f(x)).collect()
-    }
-
     fn sum(&self) -> N {
         self.data_iter().fold(N::zero(), |s, &x| s + x)
     }
@@ -61,14 +56,11 @@ where  I: SpIndex,
         } else {
             N::zero()
         }
-
     }
 
     fn center(&self) -> CsVecI<N, I> {
         let avg = self.avg();
-        let c = |x: &N| *x - avg;
-        CsVecI::new(self.dim(), self.ind_vec(),
-                    self.data_map(c))
+        self.map(|x: &N| *x - avg)
     }
 
     fn l1_norm(&self) -> N {
@@ -87,7 +79,7 @@ impl<N, I, IS, DS> CsFloatVec<N, I> for CsVecBase<IS, DS>
            N: Num + Copy + Sum + Float {
 
     fn l2_norm(&self) -> N  {
-        self.data_map(|x| *x * *x).iter()
+        self.map(|x| *x * *x).data_iter()
             .fold(N::zero(), |s, &x| s + x).sqrt()
     }
 }
