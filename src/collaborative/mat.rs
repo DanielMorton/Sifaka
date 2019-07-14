@@ -16,22 +16,26 @@ pub trait CsMatBaseExt<N, I>
     fn data_vec(&self) -> Vec<N>;
 
     fn outer_sum(&self) -> CsVecI<N, I>;
+    fn outer_avg(&self) ->CsVecI<N, I>;
+    fn outer_center(&self) -> CsMatI<N, I>;
+    fn outer_l1_norm(&self) -> CsVecI<N, I>;
+
     fn inner_sum(&self) -> CsVecI<N, I>;
+    fn inner_avg(&self) -> CsVecI<N, I>;
+    fn inner_center(&self) -> CsMatI<N, I>;
+    fn inner_l1_norm(&self) -> CsVecI<N, I>;
 
     fn col_sum(&self) -> CsVecI<N, I>;
     fn row_sum(&self) -> CsVecI<N, I>;
 
-    fn outer_avg(&self) ->CsVecI<N, I>;
-    fn inner_avg(&self) -> CsVecI<N, I>;
-
     fn col_avg(&self) -> CsVecI<N, I>;
     fn row_avg(&self) -> CsVecI<N, I>;
 
-    fn outer_center(&self) -> CsMatI<N, I>;
-    fn inner_center(&self) -> CsMatI<N, I>;
-
     fn col_center(&self) -> CsMatI<N, I>;
     fn row_center(&self) -> CsMatI<N, I>;
+
+    fn col_l1_norm(&self) -> CsVecI<N, I>;
+    fn row_l1_norm(&self) -> CsVecI<N, I>;
 }
 
 impl<N, I, IS, DS> CsMatBaseExt<N, I> for CsMatBase<N, I, IS, IS, DS>
@@ -87,15 +91,26 @@ impl<N, I, IS, DS> CsMatBaseExt<N, I> for CsMatBase<N, I, IS, IS, DS>
         CsMatI::new(self.shape(), self.ip_vec(), self.ind_vec(), data)
     }
 
-    fn inner_sum(&self) -> CsVecI<N, I> {
-        self.to_other_storage().outer_sum()
+    fn outer_l1_norm(&self) -> CsVecI<N, I> {
+        let mut ind_vec: Vec<I> = Vec::new();
+        let mut avg_vec: Vec<N> = Vec::new();
+        for (ind, vec) in self.outer_iterator().enumerate() {
+            let v = vec.l1_norm();
+            if v != N::zero() {
+                ind_vec.push( From::from(ind));
+                avg_vec.push(v);
+            }
+        }
+        CsVecI::new(self.cols(), ind_vec, avg_vec)
     }
 
-    fn inner_avg(&self) -> CsVecI<N, I> {
-        self.to_other_storage().outer_avg()
-    }
+    fn inner_sum(&self) -> CsVecI<N, I> { self.to_other_storage().outer_sum() }
+
+    fn inner_avg(&self) -> CsVecI<N, I> { self.to_other_storage().outer_avg() }
 
     fn inner_center(&self) -> CsMatI<N, I> { self.to_other_storage().outer_center() }
+
+    fn inner_l1_norm(&self) -> CsVecI<N, I> { self.to_other_storage().outer_l1_norm() }
 
     fn col_sum(&self) -> CsVecI<N, I> {
         if self.is_csc() {self.outer_sum()} else {self.inner_sum()}
@@ -119,6 +134,14 @@ impl<N, I, IS, DS> CsMatBaseExt<N, I> for CsMatBase<N, I, IS, IS, DS>
 
     fn row_center(&self) -> CsMatI<N, I> {
         if self.is_csr() {self.outer_center()} else {self.inner_center()}
+    }
+
+    fn col_l1_norm(&self) -> CsVecI<N, I> {
+        if self.is_csc() {self.outer_l1_norm()} else {self.inner_l1_norm()}
+    }
+
+    fn row_l1_norm(&self) -> CsVecI<N, I> {
+        if self.is_csr() {self.outer_l1_norm()} else {self.inner_l1_norm()}
     }
 
 }
