@@ -2,6 +2,7 @@ use std::iter::Sum;
 use std::ops::Deref;
 
 use num_traits::{Float, Num};
+use num_traits::real::Real;
 use sprs::{CsMatBase, CsMatI, CsVecI};
 use sprs::SpIndex;
 
@@ -38,7 +39,7 @@ impl<N, I, IS, DS> CsMatBaseExt<N, I> for CsMatBase<N, I, IS, IS, DS>
         I: SpIndex + From<usize>,
         IS: Deref<Target = [I]>,
         DS: Deref<Target = [N]>,
-        N: Num + Copy + Default + Sum {
+        N: Num + Copy + Default + Sum + Real {
 
     fn ip_vec(&self) -> Vec<I> {
         self.indptr().to_vec()

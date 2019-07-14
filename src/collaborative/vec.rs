@@ -3,6 +3,7 @@ use std::ops::Deref;
 use std::slice::Iter;
 
 use num_traits::{Float, Num};
+use num_traits::real::Real;
 use sprs::{CsVecBase, CsVecI};
 use sprs::SpIndex;
 
@@ -17,13 +18,14 @@ pub trait CsVecBaseExt<N, I> {
     fn length(&self) -> usize;
     fn avg(&self) -> N;
     fn center(&self) -> CsVecI<N, I>;
+    fn l1_norm(&self) -> N;
 }
 
 impl<N, I, IS, DS> CsVecBaseExt<N, I> for CsVecBase<IS, DS>
 where  I: SpIndex,
        IS: Deref<Target = [I]>,
        DS: Deref<Target = [N]>,
-       N: Num + Copy + Sum {
+       N: Num + Copy + Sum + Real {
 
     fn ind_iter(&self) -> Iter<I> {
         self.indices().iter()
@@ -67,6 +69,10 @@ where  I: SpIndex,
         let c = |x: &N| *x - avg;
         CsVecI::new(self.dim(), self.ind_vec(),
                     self.data_map(c))
+    }
+
+    fn l1_norm(&self) -> N {
+        self.data_iter().fold(N::zero(), |s, &x| s + x.abs())
     }
 }
 
