@@ -4,7 +4,7 @@ use std::iter::Sum;
 use num_traits::{Float, Num};
 use sprs::CsMatI;
 use sprs::SpIndex;
-use crate::collaborative::mat::CsFloatMat;
+use crate::collaborative::mat::CsMatFloat;
 
 enum Correlation {
     Pearson,

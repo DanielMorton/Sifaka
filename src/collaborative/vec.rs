@@ -65,11 +65,12 @@ where  I: SpIndex,
     }
 }
 
-pub trait CsFloatVec<N, I> {
+pub trait CsVecFloat<N, I> {
     fn l2_norm(&self) -> N;
+    fn normalize(&self) -> CsVecI<N, I>;
 }
 
-impl<N, I, IS, DS> CsFloatVec<N, I> for CsVecBase<IS, DS>
+impl<N, I, IS, DS> CsVecFloat<N, I> for CsVecBase<IS, DS>
     where  I: SpIndex,
            IS: Deref<Target = [I]>,
            DS: Deref<Target = [N]>,
@@ -77,5 +78,10 @@ impl<N, I, IS, DS> CsFloatVec<N, I> for CsVecBase<IS, DS>
 
     fn l2_norm(&self) -> N  {
         self.data_fold(N::zero(), |s, &x| s + x * x).sqrt()
+    }
+
+    fn normalize(&self) -> CsVecI<N, I> {
+        let norm = self.l2_norm();
+        self.map(|x| *x/norm)
     }
 }
