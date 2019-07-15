@@ -1,5 +1,5 @@
 pub use correlation::{correlation, SimType};
-pub use mat::CsMatBaseExt;
+pub use mat::{CsMatFloat, CsMatBaseExt};
 pub use vec::{CsVecFloat, CsVecBaseExt};
 
 pub mod mat;

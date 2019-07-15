@@ -7,8 +7,8 @@ mod collaborative;
 
 fn main() {
     let a = CsMatI::new_csc((3, 3),
-                           vec![0u32, 2u32, 4u32, 5u32],
-                           vec![0u32, 1u32, 0u32, 2u32, 2u32],
+                           vec![0usize, 2usize, 4usize, 5usize],
+                           vec![0usize, 1usize, 0usize, 2usize, 2usize],
                            vec![1f64, 2f64, 3f64, 4f64, 5f64]);
 
     let eye = CsMatI::eye(3);
@@ -19,5 +19,5 @@ fn main() {
     println!("{}", x.sum());
     println!("{}", x.avg());
 //    println!("{}", a.row_avg().sum());
-    let _a_cor = correlation(&a, SimType::ItemItem);
+    let _a_cor = correlation(&a, &SimType::ItemItem);
 }

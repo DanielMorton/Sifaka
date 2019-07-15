@@ -223,8 +223,6 @@ impl<N, I, IS, DS> CsMatFloat<N, I> for CsMatBase<N, I, IS, IS, DS>
         if self.is_csr() {self.outer_l2_norm()} else {self.inner_l2_norm()}
     }
 
-
-
     fn col_normalize(&self) -> CsMatI<N, I> {
         if self.is_csc() {self.outer_normalize()} else {self.inner_normalize()}
     }
