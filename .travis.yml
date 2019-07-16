@@ -14,8 +14,7 @@ script:
     - rustc --version
     - cargo --version
     - cargo test --all --verbose
-    - ./.travis_rustfmt
-
+    
 notifications:
   email:
     - on_success: change
