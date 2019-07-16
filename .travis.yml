@@ -13,6 +13,7 @@ matrix:
 script:
     - rustc --version
     - cargo --version
+    - cargo build
     - cargo test --all --verbose
     
 notifications:
