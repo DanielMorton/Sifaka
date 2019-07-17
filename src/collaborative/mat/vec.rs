@@ -2,7 +2,7 @@ use std::iter::Sum;
 use std::ops::Deref;
 use std::slice::Iter;
 
-use num_traits::{Float, Num};
+use num_traits::Num;
 use num_traits::real::Real;
 use sprs::{CsVecBase, CsVecI};
 use sprs::SpIndex;
@@ -62,26 +62,5 @@ where  I: SpIndex,
 
     fn l1_norm(&self) -> N {
         self.data_fold(N::zero(), |s, &x| s + x.abs())
-    }
-}
-
-pub trait CsVecFloat<N, I> {
-    fn l2_norm(&self) -> N;
-    fn normalize(&self) -> CsVecI<N, I>;
-}
-
-impl<N, I, IS, DS> CsVecFloat<N, I> for CsVecBase<IS, DS>
-    where  I: SpIndex,
-           IS: Deref<Target = [I]>,
-           DS: Deref<Target = [N]>,
-           N: Num + Sum + Float {
-
-    fn l2_norm(&self) -> N  {
-        self.data_fold(N::zero(), |s, &x| s + x * x).sqrt()
-    }
-
-    fn normalize(&self) -> CsVecI<N, I> {
-        let norm = self.l2_norm();
-        self.map(|x| *x/norm)
     }
 }
