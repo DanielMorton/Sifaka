@@ -1,4 +1,4 @@
-pub(super) enum Correlation {
+pub enum Correlation {
     Pearson,
     Cosine
 }
