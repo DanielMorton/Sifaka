@@ -25,7 +25,7 @@ impl<N, I, IS, DS> CsVecBaseExt<N, I> for CsVecBase<IS, DS>
 where  I: SpIndex,
        IS: Deref<Target = [I]>,
        DS: Deref<Target = [N]>,
-       N: Num + Copy + Sum + Real {
+       N: Num + Sum + Real {
 
     fn length(&self) -> usize { self.indices().len() }
 
@@ -74,7 +74,7 @@ impl<N, I, IS, DS> CsVecFloat<N, I> for CsVecBase<IS, DS>
     where  I: SpIndex,
            IS: Deref<Target = [I]>,
            DS: Deref<Target = [N]>,
-           N: Num + Copy + Sum + Float {
+           N: Num + Sum + Float {
 
     fn l2_norm(&self) -> N  {
         self.data_fold(N::zero(), |s, &x| s + x * x).sqrt()

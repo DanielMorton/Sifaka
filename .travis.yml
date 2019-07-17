@@ -6,7 +6,6 @@ before_install:
 matrix:
   include:
     - rust: stable
-      env: RUN_RUSTFMT=true
     - rust: beta
     - rust: nightly
 

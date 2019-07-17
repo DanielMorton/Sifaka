@@ -26,7 +26,7 @@ impl<N, I, IS, DS> CsMatBaseHelp<N, I> for CsMatBase<N, I, IS, IS, DS>
         I: SpIndex + From<usize>,
         IS: Deref<Target = [I]>,
         DS: Deref<Target = [N]>,
-        N: Num + Copy + Default + Sum + Real {
+        N: Num + Default + Sum + Real {
 
     fn outer_sum(&self) -> CsVecI<N, I> {
         let mut ind_vec: Vec<I> = Vec::new();
@@ -109,7 +109,7 @@ impl<N, I, IS, DS> CsMatBaseExt<N, I> for CsMatBase<N, I, IS, IS, DS>
         I: SpIndex + From<usize>,
         IS: Deref<Target = [I]>,
         DS: Deref<Target = [N]>,
-        N: Num + Copy + Default + Sum + Real {
+        N: Num + Default + Sum + Real {
 
     fn ip_vec(&self) -> Vec<I> { self.indptr().to_vec() }
 
@@ -165,7 +165,7 @@ impl<N, I, IS, DS> CSMatFloatHelp<N, I> for CsMatBase<N, I, IS, IS, DS>
         I: SpIndex + From<usize>,
         IS: Deref<Target = [I]>,
         DS: Deref<Target = [N]>,
-        N: Num + Copy + Default + Sum + Float {
+        N: Num + Default + Sum + Float {
 
     fn outer_l2_norm(&self) -> CsVecI<N, I> {
         let mut ind_vec: Vec<I> = Vec::new();
@@ -213,7 +213,7 @@ impl<N, I, IS, DS> CsMatFloat<N, I> for CsMatBase<N, I, IS, IS, DS>
         I: SpIndex + From<usize>,
         IS: Deref<Target = [I]>,
         DS: Deref<Target = [N]>,
-        N: Num + Copy + Default + Sum + Float {
+        N: Num + Default + Sum + Float {
 
     fn col_l2_norm(&self) -> CsVecI<N, I> {
         if self.is_csc() {self.outer_l2_norm()} else {self.inner_l2_norm()}

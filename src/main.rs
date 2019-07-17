@@ -1,7 +1,7 @@
 use sprs::{CsMatI, CsVec};
 
-use collaborative::{correlation, SimType};
-use collaborative::CsVecBaseExt;
+use collaborative::{correlation, CsVecBaseExt};
+use collaborative::RecommenderType::ItemItem;
 
 mod collaborative;
 
@@ -19,5 +19,5 @@ fn main() {
     println!("{}", x.sum());
     println!("{}", x.avg());
 //    println!("{}", a.row_avg().sum());
-    let _a_cor = correlation(&a, &SimType::ItemItem);
+    let _a_cor = correlation(&a, &ItemItem);
 }
