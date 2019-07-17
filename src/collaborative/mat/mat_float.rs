@@ -18,7 +18,7 @@ trait CSMatFloatHelp<N, I>: CsMatBaseExt<N, I>
 
 impl<N, I, IS, DS> CSMatFloatHelp<N, I> for CsMatBase<N, I, IS, IS, DS>
     where
-        I: SpIndex + From<usize>,
+        I: SpIndex,
         IS: Deref<Target = [I]>,
         DS: Deref<Target = [N]>,
         N: Num + Default + Sum + Float {
@@ -29,7 +29,7 @@ impl<N, I, IS, DS> CSMatFloatHelp<N, I> for CsMatBase<N, I, IS, IS, DS>
         for (ind, vec) in self.outer_iterator().enumerate() {
             let v = vec.l2_norm();
             if v != N::zero() {
-                ind_vec.push( From::from(ind));
+                ind_vec.push( SpIndex::from_usize(ind));
                 norm_vec.push(v);
             }
         }
@@ -65,7 +65,7 @@ pub trait CsMatFloat<N, I>
 
 impl<N, I, IS, DS> CsMatFloat<N, I> for CsMatBase<N, I, IS, IS, DS>
     where
-        I: SpIndex + From<usize>,
+        I: SpIndex,
         IS: Deref<Target = [I]>,
         DS: Deref<Target = [N]>,
         N: Num + Default + Sum + Float {

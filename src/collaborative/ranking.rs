@@ -11,7 +11,7 @@ fn top_n_recommendations<N, I>(user_item: &CsMatI<N, I>,
                                users: &Vec<I>,
                                neighbors: &u32,
                                corr: &Correlation,
-                               rec: &RecommenderType) -> () where I:SpIndex + From<usize>,
+                               rec: &RecommenderType) -> () where I:SpIndex,
 N: Num + Copy + Default + Sum + Float {
     let sim_mat = match corr {
         Correlation::Cosine => correlation(user_item, rec),

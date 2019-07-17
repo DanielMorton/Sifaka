@@ -9,7 +9,7 @@ use super::mat::CsMatFloat;
 
 pub fn correlation<N, I>(user_item: &CsMatI<N, I>,
                          rec: &RecommenderType) -> CsMatI<N, I>
-    where I: SpIndex + From<usize>,
+    where I: SpIndex,
           N: Num + Copy + Default + Sum + Float {
     match rec {
         RecommenderType::UserUser => {

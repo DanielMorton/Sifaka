@@ -23,7 +23,7 @@ trait CsMatBaseHelp<N, I>
 
 impl<N, I, IS, DS> CsMatBaseHelp<N, I> for CsMatBase<N, I, IS, IS, DS>
     where
-        I: SpIndex + From<usize>,
+        I: SpIndex,
         IS: Deref<Target = [I]>,
         DS: Deref<Target = [N]>,
         N: Num + Default + Sum + Real {
@@ -34,7 +34,7 @@ impl<N, I, IS, DS> CsMatBaseHelp<N, I> for CsMatBase<N, I, IS, IS, DS>
         for (ind, vec) in self.outer_iterator().enumerate() {
             let v = vec.sum();
             if v != N::zero() {
-                ind_vec.push( From::from(ind));
+                ind_vec.push( SpIndex::from_usize(ind));
                 sum_vec.push(v);
             }
         }
@@ -42,12 +42,13 @@ impl<N, I, IS, DS> CsMatBaseHelp<N, I> for CsMatBase<N, I, IS, IS, DS>
     }
 
     fn outer_avg(&self) -> CsVecI<N, I> {
+        let ip = self.ip_vec();
         let mut ind_vec: Vec<I> = Vec::new();
         let mut avg_vec: Vec<N> = Vec::new();
         for (ind, vec) in self.outer_iterator().enumerate() {
             let v = vec.avg();
             if v != N::zero() {
-                ind_vec.push( From::from(ind));
+                ind_vec.push( SpIndex::from_usize(ind));
                 avg_vec.push(v);
             }
         }
@@ -68,7 +69,7 @@ impl<N, I, IS, DS> CsMatBaseHelp<N, I> for CsMatBase<N, I, IS, IS, DS>
         for (ind, vec) in self.outer_iterator().enumerate() {
             let v = vec.l1_norm();
             if v != N::zero() {
-                ind_vec.push( From::from(ind));
+                ind_vec.push( SpIndex::from_usize(ind));
                 avg_vec.push(v);
             }
         }
@@ -106,7 +107,7 @@ pub trait CsMatBaseExt<N, I>
 
 impl<N, I, IS, DS> CsMatBaseExt<N, I> for CsMatBase<N, I, IS, IS, DS>
     where
-        I: SpIndex + From<usize>,
+        I: SpIndex,
         IS: Deref<Target = [I]>,
         DS: Deref<Target = [N]>,
         N: Num + Default + Sum + Real {
