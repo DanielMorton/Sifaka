@@ -1,6 +1,6 @@
 use sprs::{CsMatI, CsVec};
 
-use collaborative::{correlation, CsMatBaseExt, CsVecBaseExt};
+use collaborative::{CsMatBaseExt, CsVecBaseExt};
 use collaborative::Correlation::Cosine;
 use collaborative::RecommenderType::ItemItem;
 

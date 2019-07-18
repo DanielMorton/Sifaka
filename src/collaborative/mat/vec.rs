@@ -64,3 +64,24 @@ where  I: SpIndex,
         self.data_fold(N::zero(), |s, &x| s + x.abs())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use sprs::CsVecI;
+
+    use assert_approx_eq::assert_approx_eq;
+
+    use super::CsVecBaseExt;
+
+    #[test]
+    fn test_length() {
+        let v  = CsVecI::new(5, vec![0, 2, 4], vec![3.14, 2.7, 1.6]);
+        assert_eq!(v.length(), 3);
+    }
+
+    #[test]
+    fn test_float_sum() {
+        let v  = CsVecI::new(5, vec![0, 2, 4], vec![3.14, 2.70, 1.60]);
+        assert_approx_eq!(v.sum(), 7.44f64);
+    }
+}
