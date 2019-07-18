@@ -49,9 +49,7 @@ where  I: SpIndex,
     fn avg(&self) -> N {
         if self.length() != 0 {
             self.sum()/vec![N::one(); self.length()].iter().map(|x| *x).sum()
-        } else {
-            N::zero()
-        }
+        } else { N::zero() }
     }
 
     fn l1_norm(&self) -> N { self.data_fold(N::zero(), |s, &x| s + x.abs()) }
