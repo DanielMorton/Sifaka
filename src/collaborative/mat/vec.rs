@@ -103,4 +103,12 @@ mod tests {
         let n: CsVecI<i32, usize> = CsVecI::new(6, Vec::new(), Vec::new());
         assert_eq!(n.avg(), 0)
     }
+
+    #[test]
+    fn test_int_norm() {
+        let v1  = CsVecI::new(5, vec![0, 2, 4], vec![3, 2, 1]);
+        let v2  = CsVecI::new(5, vec![0, 2, 4], vec![-3, -2, -1]);
+        assert_eq!(v1.l1_norm(), 6);
+        assert_eq!(v2.l1_norm(), 6);
+    }
 }
