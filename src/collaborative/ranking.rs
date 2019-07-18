@@ -1,8 +1,7 @@
-use std::fmt::Display;
 use std::iter::Sum;
 
-use num_traits::{Float, Num};
-use sprs::{CsMatI, CsVecI, SpIndex};
+use num_traits::{Float, Num, Signed};
+use sprs::{CsMatI, SpIndex};
 
 use super::{Correlation, RecommenderType};
 use super::correlation;
@@ -12,8 +11,10 @@ fn top_n_recommendations<N, I>(user_item: &CsMatI<N, I>,
                                users: &Vec<I>,
                                neighbors: &u32,
                                corr: &Correlation,
-                               rec: &RecommenderType) -> () where I:SpIndex,
-N: Num + Copy + Default + Display + Sum + Float {
+                               rec: &RecommenderType) -> ()
+    where
+        I: SpIndex,
+        N: Num + Sum + Clone + Copy + Signed + Default + Float {
     let sim_mat = match corr {
         Correlation::Cosine => correlation(user_item, rec),
         Correlation::Pearson => match rec {

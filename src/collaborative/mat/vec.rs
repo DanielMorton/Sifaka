@@ -2,8 +2,7 @@ use std::iter::Sum;
 use std::ops::Deref;
 use std::slice::Iter;
 
-use num_traits::Num;
-use num_traits::real::Real;
+use num_traits::{Num, Signed};
 use sprs::{CsVecBase, CsVecI};
 use sprs::SpIndex;
 
@@ -17,15 +16,15 @@ pub trait CsVecBaseExt<N, I> {
     fn data_fold<T>(&self, init: N, f: T) -> N where T: Fn(N, &N) -> N;
     fn sum(&self) -> N;
     fn avg(&self) -> N;
-    fn center(&self) -> CsVecI<N, I>;
     fn l1_norm(&self) -> N;
+    fn center(&self) -> CsVecI<N, I>;
 }
 
 impl<N, I, IS, DS> CsVecBaseExt<N, I> for CsVecBase<IS, DS>
 where  I: SpIndex,
        IS: Deref<Target = [I]>,
        DS: Deref<Target = [N]>,
-       N: Num + Sum + Real {
+       N: Num + Sum + Copy + Clone + Signed {
 
     fn length(&self) -> usize { self.indices().len() }
 
@@ -55,13 +54,11 @@ where  I: SpIndex,
         }
     }
 
+    fn l1_norm(&self) -> N { self.data_fold(N::zero(), |s, &x| s + x.abs()) }
+
     fn center(&self) -> CsVecI<N, I> {
         let avg = self.avg();
         self.map(|x: &N| *x - avg)
-    }
-
-    fn l1_norm(&self) -> N {
-        self.data_fold(N::zero(), |s, &x| s + x.abs())
     }
 }
 
@@ -83,5 +80,27 @@ mod tests {
     fn test_float_sum() {
         let v  = CsVecI::new(5, vec![0, 2, 4], vec![3.14, 2.70, 1.60]);
         assert_approx_eq!(v.sum(), 7.44f64);
+    }
+
+    #[test]
+    fn test_int_sum() {
+        let v  = CsVecI::new(5, vec![0, 2, 4], vec![3, 2, 1]);
+        assert_eq!(v.sum(), 6);
+    }
+
+    #[test]
+    fn test_float_avg() {
+        let v  = CsVecI::new(5, vec![0, 2, 4], vec![3.14f64, 2.7, 1.6]);
+        assert_approx_eq!(v.avg(), 2.48);
+        let n: CsVecI<f64, usize> = CsVecI::new(6, Vec::new(), Vec::new());
+        assert_eq!(n.avg(), 0.0)
+    }
+
+    #[test]
+    fn test_int_avg() {
+        let v  = CsVecI::new(5, vec![0, 2, 4], vec![3, 2, 1]);
+        assert_eq!(v.sum(), 2);
+        let n: CsVecI<i32, usize> = CsVecI::new(6, Vec::new(), Vec::new());
+        assert_eq!(n.avg(), 0)
     }
 }

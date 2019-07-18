@@ -1,7 +1,7 @@
 use std::iter::Sum;
 use std::ops::Deref;
 
-use num_traits::{Float, Num};
+use num_traits::{Float, Num, Signed};
 use sprs::{CsVecBase, CsVecI};
 use sprs::SpIndex;
 
@@ -16,7 +16,7 @@ impl<N, I, IS, DS> CsVecFloat<N, I> for CsVecBase<IS, DS>
     where  I: SpIndex,
            IS: Deref<Target = [I]>,
            DS: Deref<Target = [N]>,
-           N: Num + Sum + Float {
+           N: Num + Sum + Signed + Float {
 
     fn l2_norm(&self) -> N  {
         self.data_fold(N::zero(), |s, &x| s + x * x).sqrt()

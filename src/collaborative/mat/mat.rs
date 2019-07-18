@@ -1,10 +1,7 @@
-use std::fmt::Display;
 use std::iter::Sum;
-use std::ops::{Deref, Mul};
+use std::ops::Deref;
 
-use ndarray::Array;
-use num_traits::Num;
-use num_traits::real::Real;
+use num_traits::{Num, Signed};
 use sprs::{CsMatBase, CsMatI, CsVecI};
 use sprs::SpIndex;
 
@@ -28,7 +25,7 @@ impl<N, I, IS, DS> CsMatBaseHelp<N, I> for CsMatBase<N, I, IS, IS, DS>
         I: SpIndex,
         IS: Deref<Target = [I]>,
         DS: Deref<Target = [N]>,
-        N: Num + Default + Display + Sum + Real {
+        N: Num + Sum + Clone + Copy + Signed + Default {
 
     fn outer_sum(&self) -> CsVecI<N, I> {
         let mut ind_vec: Vec<I> = Vec::new();
@@ -111,7 +108,7 @@ impl<N, I, IS, DS> CsMatBaseExt<N, I> for CsMatBase<N, I, IS, IS, DS>
         I: SpIndex,
         IS: Deref<Target = [I]>,
         DS: Deref<Target = [N]>,
-        N: Num + Default + Display + Sum + Real {
+        N: Num + Sum + Clone + Copy + Signed + Default {
 
     fn ip_vec(&self) -> Vec<I> { self.indptr().to_vec() }
 
