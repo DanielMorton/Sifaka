@@ -1,6 +1,8 @@
+use std::fmt::Display;
 use std::iter::Sum;
-use std::ops::Deref;
+use std::ops::{Deref, Mul};
 
+use ndarray::Array;
 use num_traits::Num;
 use num_traits::real::Real;
 use sprs::{CsMatBase, CsMatI, CsVecI};
@@ -26,7 +28,7 @@ impl<N, I, IS, DS> CsMatBaseHelp<N, I> for CsMatBase<N, I, IS, IS, DS>
         I: SpIndex,
         IS: Deref<Target = [I]>,
         DS: Deref<Target = [N]>,
-        N: Num + Default + Sum + Real {
+        N: Num + Default + Display + Sum + Real {
 
     fn outer_sum(&self) -> CsVecI<N, I> {
         let mut ind_vec: Vec<I> = Vec::new();
@@ -38,11 +40,10 @@ impl<N, I, IS, DS> CsMatBaseHelp<N, I> for CsMatBase<N, I, IS, IS, DS>
                 sum_vec.push(v);
             }
         }
-        CsVecI::new(self.cols(), ind_vec, sum_vec)
+        CsVecI::new(self.outer_dims(), ind_vec, sum_vec)
     }
 
     fn outer_avg(&self) -> CsVecI<N, I> {
-        let ip = self.ip_vec();
         let mut ind_vec: Vec<I> = Vec::new();
         let mut avg_vec: Vec<N> = Vec::new();
         for (ind, vec) in self.outer_iterator().enumerate() {
@@ -52,7 +53,7 @@ impl<N, I, IS, DS> CsMatBaseHelp<N, I> for CsMatBase<N, I, IS, IS, DS>
                 avg_vec.push(v);
             }
         }
-        CsVecI::new(self.cols(), ind_vec, avg_vec)
+        CsVecI::new(self.outer_dims(), ind_vec, avg_vec)
     }
 
     fn outer_center(&self) -> CsMatI<N, I> {
@@ -73,7 +74,7 @@ impl<N, I, IS, DS> CsMatBaseHelp<N, I> for CsMatBase<N, I, IS, IS, DS>
                 avg_vec.push(v);
             }
         }
-        CsVecI::new(self.cols(), ind_vec, avg_vec)
+        CsVecI::new(self.outer_dims(), ind_vec, avg_vec)
     }
 
     fn inner_sum(&self) -> CsVecI<N, I> { self.to_other_storage().outer_sum() }
@@ -110,7 +111,7 @@ impl<N, I, IS, DS> CsMatBaseExt<N, I> for CsMatBase<N, I, IS, IS, DS>
         I: SpIndex,
         IS: Deref<Target = [I]>,
         DS: Deref<Target = [N]>,
-        N: Num + Default + Sum + Real {
+        N: Num + Default + Display + Sum + Real {
 
     fn ip_vec(&self) -> Vec<I> { self.indptr().to_vec() }
 

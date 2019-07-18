@@ -1,3 +1,4 @@
+use std::fmt::Display;
 use std::iter::Sum;
 
 use num_traits::{Float, Num};
@@ -12,7 +13,7 @@ fn top_n_recommendations<N, I>(user_item: &CsMatI<N, I>,
                                neighbors: &u32,
                                corr: &Correlation,
                                rec: &RecommenderType) -> () where I:SpIndex,
-N: Num + Copy + Default + Sum + Float {
+N: Num + Copy + Default + Display + Sum + Float {
     let sim_mat = match corr {
         Correlation::Cosine => correlation(user_item, rec),
         Correlation::Pearson => match rec {

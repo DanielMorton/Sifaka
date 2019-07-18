@@ -1,3 +1,4 @@
+use std::fmt::Display;
 use std::iter::Sum;
 
 use num_traits::{Float, Num};
@@ -10,7 +11,7 @@ use super::mat::CsMatFloat;
 pub fn correlation<N, I>(user_item: &CsMatI<N, I>,
                          rec: &RecommenderType) -> CsMatI<N, I>
     where I: SpIndex,
-          N: Num + Copy + Default + Sum + Float {
+          N: Num + Copy + Default + Display + Sum + Float {
     match rec {
         RecommenderType::UserUser => {
             let user_norm = user_item.col_normalize();

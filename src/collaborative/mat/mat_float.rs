@@ -1,3 +1,4 @@
+use std::fmt::Display;
 use std::iter::Sum;
 use std::ops::Deref;
 
@@ -21,7 +22,7 @@ impl<N, I, IS, DS> CSMatFloatHelp<N, I> for CsMatBase<N, I, IS, IS, DS>
         I: SpIndex,
         IS: Deref<Target = [I]>,
         DS: Deref<Target = [N]>,
-        N: Num + Default + Sum + Float {
+        N: Num + Default + Display + Sum + Float {
 
     fn outer_l2_norm(&self) -> CsVecI<N, I> {
         let mut ind_vec: Vec<I> = Vec::new();
@@ -33,7 +34,7 @@ impl<N, I, IS, DS> CSMatFloatHelp<N, I> for CsMatBase<N, I, IS, IS, DS>
                 norm_vec.push(v);
             }
         }
-        CsVecI::new(self.cols(), ind_vec, norm_vec)
+        CsVecI::new(self.outer_dims(), ind_vec, norm_vec)
     }
 
     fn outer_normalize(&self) -> CsMatI<N, I> {
@@ -68,7 +69,7 @@ impl<N, I, IS, DS> CsMatFloat<N, I> for CsMatBase<N, I, IS, IS, DS>
         I: SpIndex,
         IS: Deref<Target = [I]>,
         DS: Deref<Target = [N]>,
-        N: Num + Default + Sum + Float {
+        N: Num + Default + Display + Sum + Float {
 
     fn col_l2_norm(&self) -> CsVecI<N, I> {
         if self.is_csc() {self.outer_l2_norm()} else {self.inner_l2_norm()}
