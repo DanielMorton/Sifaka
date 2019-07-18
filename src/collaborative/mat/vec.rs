@@ -111,4 +111,12 @@ mod tests {
         assert_eq!(v1.l1_norm(), 6);
         assert_eq!(v2.l1_norm(), 6);
     }
+
+    #[test]
+    fn test_float_norm() {
+        let v1  = CsVecI::new(5, vec![0, 2, 4], vec![3.14f64, 2.7, 1.6]);
+        let v2  = CsVecI::new(5, vec![0, 2, 4], vec![-3.14f64, -2.7, -1.6]);
+        assert_approx_eq!(v1.sum(), 7.44f64);
+        assert_approx_eq!(v2.sum(), 7.44f64);
+    }
 }
