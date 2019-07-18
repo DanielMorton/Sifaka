@@ -99,7 +99,7 @@ mod tests {
     #[test]
     fn test_int_avg() {
         let v  = CsVecI::new(5, vec![0, 2, 4], vec![3, 2, 1]);
-        assert_eq!(v.sum(), 2);
+        assert_eq!(v.avg(), 2);
         let n: CsVecI<i32, usize> = CsVecI::new(6, Vec::new(), Vec::new());
         assert_eq!(n.avg(), 0)
     }
@@ -116,7 +116,19 @@ mod tests {
     fn test_float_norm() {
         let v1  = CsVecI::new(5, vec![0, 2, 4], vec![3.14f64, 2.7, 1.6]);
         let v2  = CsVecI::new(5, vec![0, 2, 4], vec![-3.14f64, -2.7, -1.6]);
-        assert_approx_eq!(v1.sum(), 7.44f64);
-        assert_approx_eq!(v2.sum(), 7.44f64);
+        assert_approx_eq!(v1.l1_norm(), 7.44f64);
+        assert_approx_eq!(v2.l1_norm(), 7.44f64);
+    }
+
+    fn test_int_center() {
+        let v  = CsVecI::new(5, vec![0, 2, 4], vec![3, 2, 1]);
+        let v_cent = CsVecI::new(5, vec![0, 2, 4], vec![1, 0, -1]);
+        assert_eq!(v.center(), v_cent);
+    }
+
+    fn test_float_center() {
+        let v  = CsVecI::new(5, vec![0, 2, 4], vec![3.14f64, 2.7, 1.6]).center();
+        let v_cent = CsVecI::new(5, vec![0, 2, 4], vec![0.66, 0.22, -0.88]);
+        assert_eq!(v, v_cent);
     }
 }
