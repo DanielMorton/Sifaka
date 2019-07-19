@@ -7,7 +7,6 @@ use sprs::{CsVecBase, CsVecI};
 use sprs::SpIndex;
 
 pub trait CsVecBaseExt<N, I> {
-    fn length(&self) -> usize;
     fn ind_iter(&self) -> Iter<I>;
     fn data_iter(&self) -> Iter<N>;
 
@@ -26,7 +25,6 @@ where  I: SpIndex,
        DS: Deref<Target = [N]>,
        N: Num + Sum + Copy + Clone + Signed {
 
-    fn length(&self) -> usize { self.indices().len() }
 
     fn ind_iter(&self) -> Iter<I> { self.indices().iter() }
 
@@ -47,8 +45,8 @@ where  I: SpIndex,
 
 
     fn avg(&self) -> N {
-        if self.length() != 0 {
-            self.sum()/vec![N::one(); self.length()].iter().map(|x| *x).sum()
+        if self.nnz() != 0 {
+            self.sum()/vec![N::one(); self.nnz()].iter().map(|x| *x).sum()
         } else { N::zero() }
     }
 
@@ -68,28 +66,24 @@ mod tests {
 
     use super::CsVecBaseExt;
 
-    #[test]
-    fn test_length() {
-        let v  = CsVecI::new(5, vec![0, 2, 4], vec![3.14, 2.7, 1.6]);
-        assert_eq!(v.length(), 3);
+    lazy_static! {
+        static ref V_FLOAT: CsVecI<f64, usize> = CsVecI::new(5, vec![0, 2, 4], vec![3.14, 2.70, 1.60]);
+        static ref V_INT: CsVecI<i32, usize> = CsVecI::new(5, vec![0, 2, 4], vec![3, 2, 1]);
     }
-
     #[test]
     fn test_float_sum() {
-        let v  = CsVecI::new(5, vec![0, 2, 4], vec![3.14, 2.70, 1.60]);
-        assert_approx_eq!(v.sum(), 7.44f64);
+        assert_approx_eq!(V_FLOAT.sum(), 7.44f64);
     }
 
     #[test]
     fn test_int_sum() {
-        let v  = CsVecI::new(5, vec![0, 2, 4], vec![3, 2, 1]);
-        assert_eq!(v.sum(), 6);
+        assert_eq!(V_INT.sum(), 6);
     }
 
     #[test]
     fn test_float_avg() {
         let v  = CsVecI::new(5, vec![0, 2, 4], vec![3.14f64, 2.7, 1.6]);
-        assert_approx_eq!(v.avg(), 2.48);
+        assert_approx_eq!(V_FLOAT.avg(), 2.48);
         let n: CsVecI<f64, usize> = CsVecI::new(6, Vec::new(), Vec::new());
         assert_eq!(n.avg(), 0.0)
     }
@@ -97,36 +91,32 @@ mod tests {
     #[test]
     fn test_int_avg() {
         let v  = CsVecI::new(5, vec![0, 2, 4], vec![3, 2, 1]);
-        assert_eq!(v.avg(), 2);
+        assert_eq!(V_INT.avg(), 2);
         let n: CsVecI<i32, usize> = CsVecI::new(6, Vec::new(), Vec::new());
         assert_eq!(n.avg(), 0)
     }
 
     #[test]
     fn test_int_norm() {
-        let v1  = CsVecI::new(5, vec![0, 2, 4], vec![3, 2, 1]);
-        let v2  = CsVecI::new(5, vec![0, 2, 4], vec![-3, -2, -1]);
-        assert_eq!(v1.l1_norm(), 6);
-        assert_eq!(v2.l1_norm(), 6);
+        let v  = CsVecI::new(5, vec![0, 2, 4], vec![-3, -2, -1]);
+        assert_eq!(V_INT.l1_norm(), 6);
+        assert_eq!(v.l1_norm(), 6);
     }
 
     #[test]
     fn test_float_norm() {
-        let v1  = CsVecI::new(5, vec![0, 2, 4], vec![3.14f64, 2.7, 1.6]);
-        let v2  = CsVecI::new(5, vec![0, 2, 4], vec![-3.14f64, -2.7, -1.6]);
-        assert_approx_eq!(v1.l1_norm(), 7.44f64);
-        assert_approx_eq!(v2.l1_norm(), 7.44f64);
+        let v  = CsVecI::new(5, vec![0, 2, 4], vec![-3.14f64, -2.7, -1.6]);
+        assert_approx_eq!(V_FLOAT.l1_norm(), 7.44f64);
+        assert_approx_eq!(v.l1_norm(), 7.44f64);
     }
 
     fn test_int_center() {
-        let v  = CsVecI::new(5, vec![0, 2, 4], vec![3, 2, 1]);
         let v_cent = CsVecI::new(5, vec![0, 2, 4], vec![1, 0, -1]);
-        assert_eq!(v.center(), v_cent);
+        assert_eq!(V_INT.center(), v_cent);
     }
 
     fn test_float_center() {
-        let v  = CsVecI::new(5, vec![0, 2, 4], vec![3.14f64, 2.7, 1.6]).center();
         let v_cent = CsVecI::new(5, vec![0, 2, 4], vec![0.66, 0.22, -0.88]);
-        assert_eq!(v, v_cent);
+        assert_eq!(V_FLOAT.center(), v_cent);
     }
 }

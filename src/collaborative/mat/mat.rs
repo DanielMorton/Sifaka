@@ -149,3 +149,93 @@ impl<N, I, IS, DS> CsMatBaseExt<N, I> for CsMatBase<N, I, IS, IS, DS>
     }
 
 }
+
+#[cfg(test)]
+mod tests {
+    use sprs::{CsMatI, CsVecI};
+
+    use super::{CsMatBaseExt, CsMatBaseHelp};
+
+    lazy_static! {
+        static ref A_FLOAT: CsMatI<f64, usize> =  CsMatI::new_csc((5, 4),
+                                vec![0, 2, 2, 4, 5],
+                                vec![0, 1, 0, 3, 3],
+                                vec![3.14, 2.7, 1.62, 0.58, 4.67]);
+        static ref A_INT: CsMatI<i32, usize> = CsMatI::new_csc((5, 4),
+                                vec![0, 2, 2, 4, 5],
+                                vec![0, 1, 0, 3, 3],
+                                vec![1, 2, 3, 4, 5]);
+        static ref B_FLOAT: CsMatI<f64, usize> =  CsMatI::new((4, 5),
+                                vec![0, 2, 2, 4, 5],
+                                vec![0, 1, 0, 3, 3],
+                                vec![3.14, 2.7, 1.62, 0.58, 4.67]);
+        static ref B_INT: CsMatI<i32, usize> = CsMatI::new((4, 5),
+                                vec![0, 2, 2, 4, 5],
+                                vec![0, 1, 0, 3, 3],
+                                vec![1, 2, 3, 4, 5]);
+    }
+
+    #[test]
+    fn test_int_sum() {
+        let outer = CsVecI::new(4, vec![0, 2, 3],
+                                vec![3, 7, 5]);
+        let inner = CsVecI::new(5, vec![0, 1, 3],
+                                vec![4, 2, 9]);
+        assert_eq!(A_INT.col_sum(), outer);
+        assert_eq!(A_INT.row_sum(), inner);
+        assert_eq!(B_INT.col_sum(), inner);
+        assert_eq!(B_INT.row_sum(), outer)
+    }
+
+    #[test]
+    fn test_float_sum() {
+        let outer = CsVecI::new(4, vec![0, 2, 3],
+                                vec![5.84, 2.2, 4.67]);
+        let inner = CsVecI::new(5, vec![0, 1, 3],
+                                vec![4.76, 2.7, 5.25]);
+        assert_eq!(A_FLOAT.col_sum(), outer);
+        assert_eq!(A_FLOAT.row_sum(), inner);
+        assert_eq!(B_FLOAT.col_sum(), inner);
+        assert_eq!(B_FLOAT.row_sum(), outer)
+    }
+
+    #[test]
+    fn test_int_avg() {
+        let outer = CsVecI::new(4, vec![0, 2, 3],
+                                vec![1, 3, 5]);
+        let inner = CsVecI::new(5, vec![0, 1, 3],
+                                vec![2, 2, 4]);
+        assert_eq!(A_INT.col_avg(), outer);
+        assert_eq!(A_INT.row_avg(), inner);
+        assert_eq!(B_INT.col_avg(), inner);
+        assert_eq!(B_INT.row_avg(), outer)
+    }
+
+    #[test]
+    fn test_float_avg() {
+        let outer = CsVecI::new(4, vec![0, 2, 3],
+                                vec![2.92, 1.1, 4.67]);
+        let inner = CsVecI::new(5, vec![0, 1, 3],
+                                vec![2.38, 2.7, 2.625]);
+        assert_eq!(A_FLOAT.col_avg(), outer);
+        assert_eq!(A_FLOAT.row_avg(), inner);
+        assert_eq!(B_FLOAT.col_avg(), inner);
+        assert_eq!(B_FLOAT.row_avg(), outer)
+    }
+
+    #[test]
+    fn test_int_center() {
+        let out_center = CsMatI::new_csc((5, 4),
+                                       vec![0, 2, 2, 4, 5],
+                                       vec![0, 1, 0, 3, 3],
+                                       vec![0, 1, 0, 1, 0]);
+        let in_center = CsMatI::new_csc((5, 4),
+                                          vec![0, 2, 2, 4, 5],
+                                          vec![0, 1, 0, 3, 3],
+                                          vec![-1, 0, 1, 0, 1]);
+        //assert_eq!(A_INT.outer_center(), out_center);
+        //assert_eq!(A_INT.row_center(), in_center.to_other_storage());
+        //assert_eq!(B_INT.col_center(), in_center);
+        //assert_eq!(B_INT.row_center(), out_center.to_other_storage());
+    }
+}
