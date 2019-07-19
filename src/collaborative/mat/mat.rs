@@ -58,7 +58,12 @@ impl<N, I, IS, DS> CsMatBaseHelp<N, I> for CsMatBase<N, I, IS, IS, DS>
         for (_, vec) in self.outer_iterator().enumerate() {
             data.append(&mut vec.center().data_vec());
         }
-        CsMatI::new(self.shape(), self.ip_vec(), self.ind_vec(), data)
+        if self.is_csc() {
+            CsMatI::new_csc(self.shape(), self.ip_vec(), self.ind_vec(), data)
+        } else {
+            CsMatI::new(self.shape(), self.ip_vec(), self.ind_vec(), data)
+        }
+
     }
 
     fn outer_l1_norm(&self) -> CsVecI<N, I> {
@@ -78,7 +83,7 @@ impl<N, I, IS, DS> CsMatBaseHelp<N, I> for CsMatBase<N, I, IS, IS, DS>
 
     fn inner_avg(&self) -> CsVecI<N, I> { self.to_other_storage().outer_avg() }
 
-    fn inner_center(&self) -> CsMatI<N, I> { self.to_other_storage().outer_center() }
+    fn inner_center(&self) -> CsMatI<N, I> { self.to_other_storage().outer_center().to_other_storage() }
 
     fn inner_l1_norm(&self) -> CsVecI<N, I> { self.to_other_storage().outer_l1_norm() }
 }
@@ -233,9 +238,9 @@ mod tests {
                                           vec![0, 2, 2, 4, 5],
                                           vec![0, 1, 0, 3, 3],
                                           vec![-1, 0, 1, 0, 1]);
-        //assert_eq!(A_INT.outer_center(), out_center);
-        //assert_eq!(A_INT.row_center(), in_center.to_other_storage());
-        //assert_eq!(B_INT.col_center(), in_center);
-        //assert_eq!(B_INT.row_center(), out_center.to_other_storage());
+        assert_eq!(A_INT.outer_center(), out_center);
+        assert_eq!(A_INT.row_center(), in_center);
+        assert_eq!(B_INT.col_center(), in_center.transpose_into());
+        assert_eq!(B_INT.row_center(), out_center.transpose_into());
     }
 }
