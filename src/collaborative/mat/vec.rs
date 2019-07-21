@@ -57,7 +57,7 @@ where
 
     fn avg(&self) -> N {
         if self.nnz() != 0 {
-            self.sum() / vec![N::one(); self.nnz()].iter().map(|x| *x).sum()
+            self.sum() / vec![N::one(); self.nnz()].iter().copied().sum()
         } else {
             N::zero()
         }
