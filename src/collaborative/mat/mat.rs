@@ -205,6 +205,8 @@ where
 mod tests {
     use sprs::{CsMatI, CsVecI};
 
+    use assert_approx_eq::assert_approx_eq;
+
     use super::{CsMatBaseExt, CsMatBaseHelp};
 
     lazy_static! {
@@ -288,7 +290,7 @@ mod tests {
             vec![0, 1, 0, 3, 3],
             vec![-1, 0, 1, 0, 1],
         );
-        assert_eq!(A_INT.outer_center(), out_center);
+        assert_eq!(A_INT.col_center(), out_center);
         assert_eq!(A_INT.row_center(), in_center);
         assert_eq!(B_INT.col_center(), in_center.transpose_into());
         assert_eq!(B_INT.row_center(), out_center.transpose_into());
@@ -296,21 +298,21 @@ mod tests {
 
     #[test]
     fn test_float_center() {
-        let out_center = CsMatI::new_csc(
+        let out_center: CsMatI<f64, usize> = CsMatI::new_csc(
             (5, 4),
             vec![0, 2, 2, 4, 5],
             vec![0, 1, 0, 3, 3],
-            vec![0, 1, 0, 1, 0],
+            vec![0.22, -0.22, 0.52, -0.52, 0.0]
         );
-        let in_center = CsMatI::new_csc(
+        let in_center: CsMatI<f64, usize> = CsMatI::new_csc(
             (5, 4),
             vec![0, 2, 2, 4, 5],
             vec![0, 1, 0, 3, 3],
-            vec![-1, 0, 1, 0, 1],
+            vec![0.76, 0.0, -0.76, -2.045, 2.045]
         );
-        assert_eq!(A_FLOAT.outer_center(), out_center);
-        assert_eq!(A_FLOAT.row_center(), in_center);
-        assert_eq!(B_FLOAT.col_center(), in_center.transpose_into());
-        assert_eq!(B_FLOAT.row_center(), out_center.transpose_into());
+        (&A_FLOAT.col_center() - &out_center).data_vec().iter().for_each(|x| assert_approx_eq!(x, 0.0));
+        (&A_FLOAT.row_center() - &in_center).data_vec().iter().for_each(|x| assert_approx_eq!(x, 0.0));
+        (&B_FLOAT.col_center() - &in_center.transpose_view()).data_vec().iter().for_each(|x| assert_approx_eq!(x, 0.0));
+        (&B_FLOAT.row_center() -  &out_center.transpose_view()).data_vec().iter().for_each(|x| assert_approx_eq!(x, 0.0));
     }
 }
