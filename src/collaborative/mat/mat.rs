@@ -2,15 +2,16 @@ use std::iter::Sum;
 use std::ops::Deref;
 
 use num_traits::{Num, Signed};
-use sprs::{CsMatBase, CsMatI, CsVecI};
-use sprs::SpIndex;
+use sprs::{CsMatBase, CsMatI, CsVecI, SpIndex};
 
 use super::CsVecBaseExt;
 
 trait CsMatBaseHelp<N, I>
-    where I:SpIndex {
+where
+    I: SpIndex,
+{
     fn outer_sum(&self) -> CsVecI<N, I>;
-    fn outer_avg(&self) ->CsVecI<N, I>;
+    fn outer_avg(&self) -> CsVecI<N, I>;
     fn outer_center(&self) -> CsMatI<N, I>;
     fn outer_l1_norm(&self) -> CsVecI<N, I>;
 
@@ -21,19 +22,19 @@ trait CsMatBaseHelp<N, I>
 }
 
 impl<N, I, IS, DS> CsMatBaseHelp<N, I> for CsMatBase<N, I, IS, IS, DS>
-    where
-        I: SpIndex,
-        IS: Deref<Target = [I]>,
-        DS: Deref<Target = [N]>,
-        N: Num + Sum + Clone + Copy + Signed + Default {
-
+where
+    I: SpIndex,
+    IS: Deref<Target = [I]>,
+    DS: Deref<Target = [N]>,
+    N: Num + Sum + Clone + Copy + Signed + Default,
+{
     fn outer_sum(&self) -> CsVecI<N, I> {
         let mut ind_vec: Vec<I> = Vec::new();
         let mut sum_vec: Vec<N> = Vec::new();
         for (ind, vec) in self.outer_iterator().enumerate() {
             let v = vec.sum();
             if v != N::zero() {
-                ind_vec.push( SpIndex::from_usize(ind));
+                ind_vec.push(SpIndex::from_usize(ind));
                 sum_vec.push(v);
             }
         }
@@ -46,7 +47,7 @@ impl<N, I, IS, DS> CsMatBaseHelp<N, I> for CsMatBase<N, I, IS, IS, DS>
         for (ind, vec) in self.outer_iterator().enumerate() {
             let v = vec.avg();
             if v != N::zero() {
-                ind_vec.push( SpIndex::from_usize(ind));
+                ind_vec.push(SpIndex::from_usize(ind));
                 avg_vec.push(v);
             }
         }
@@ -63,7 +64,6 @@ impl<N, I, IS, DS> CsMatBaseHelp<N, I> for CsMatBase<N, I, IS, IS, DS>
         } else {
             CsMatI::new(self.shape(), self.ip_vec(), self.ind_vec(), data)
         }
-
     }
 
     fn outer_l1_norm(&self) -> CsVecI<N, I> {
@@ -72,25 +72,34 @@ impl<N, I, IS, DS> CsMatBaseHelp<N, I> for CsMatBase<N, I, IS, IS, DS>
         for (ind, vec) in self.outer_iterator().enumerate() {
             let v = vec.l1_norm();
             if v != N::zero() {
-                ind_vec.push( SpIndex::from_usize(ind));
+                ind_vec.push(SpIndex::from_usize(ind));
                 avg_vec.push(v);
             }
         }
         CsVecI::new(self.outer_dims(), ind_vec, avg_vec)
     }
 
-    fn inner_sum(&self) -> CsVecI<N, I> { self.to_other_storage().outer_sum() }
+    fn inner_sum(&self) -> CsVecI<N, I> {
+        self.to_other_storage().outer_sum()
+    }
 
-    fn inner_avg(&self) -> CsVecI<N, I> { self.to_other_storage().outer_avg() }
+    fn inner_avg(&self) -> CsVecI<N, I> {
+        self.to_other_storage().outer_avg()
+    }
 
-    fn inner_center(&self) -> CsMatI<N, I> { self.to_other_storage().outer_center().to_other_storage() }
+    fn inner_center(&self) -> CsMatI<N, I> {
+        self.to_other_storage().outer_center().to_other_storage()
+    }
 
-    fn inner_l1_norm(&self) -> CsVecI<N, I> { self.to_other_storage().outer_l1_norm() }
+    fn inner_l1_norm(&self) -> CsVecI<N, I> {
+        self.to_other_storage().outer_l1_norm()
+    }
 }
 
 pub trait CsMatBaseExt<N, I>
-    where I:SpIndex {
-
+where
+    I: SpIndex,
+{
     fn ip_vec(&self) -> Vec<I>;
     fn ind_vec(&self) -> Vec<I>;
     fn data_vec(&self) -> Vec<N>;
@@ -109,50 +118,87 @@ pub trait CsMatBaseExt<N, I>
 }
 
 impl<N, I, IS, DS> CsMatBaseExt<N, I> for CsMatBase<N, I, IS, IS, DS>
-    where
-        I: SpIndex,
-        IS: Deref<Target = [I]>,
-        DS: Deref<Target = [N]>,
-        N: Num + Sum + Clone + Copy + Signed + Default {
+where
+    I: SpIndex,
+    IS: Deref<Target = [I]>,
+    DS: Deref<Target = [N]>,
+    N: Num + Sum + Clone + Copy + Signed + Default,
+{
+    fn ip_vec(&self) -> Vec<I> {
+        self.indptr().to_vec()
+    }
 
-    fn ip_vec(&self) -> Vec<I> { self.indptr().to_vec() }
+    fn ind_vec(&self) -> Vec<I> {
+        self.indices().to_vec()
+    }
 
-    fn ind_vec(&self) -> Vec<I> { self.indices().to_vec() }
-
-    fn data_vec(&self) -> Vec<N> { self.data().to_vec() }
+    fn data_vec(&self) -> Vec<N> {
+        self.data().to_vec()
+    }
 
     fn col_sum(&self) -> CsVecI<N, I> {
-        if self.is_csc() {self.outer_sum()} else {self.inner_sum()}
+        if self.is_csc() {
+            self.outer_sum()
+        } else {
+            self.inner_sum()
+        }
     }
 
     fn row_sum(&self) -> CsVecI<N, I> {
-        if self.is_csr() {self.outer_sum()} else {self.inner_sum()}
+        if self.is_csr() {
+            self.outer_sum()
+        } else {
+            self.inner_sum()
+        }
     }
 
     fn col_avg(&self) -> CsVecI<N, I> {
-        if self.is_csc() {self.outer_avg()} else {self.inner_avg()}
+        if self.is_csc() {
+            self.outer_avg()
+        } else {
+            self.inner_avg()
+        }
     }
 
     fn row_avg(&self) -> CsVecI<N, I> {
-        if self.is_csr() {self.outer_avg()} else {self.inner_avg()}
+        if self.is_csr() {
+            self.outer_avg()
+        } else {
+            self.inner_avg()
+        }
     }
 
     fn col_center(&self) -> CsMatI<N, I> {
-        if self.is_csc() {self.outer_center()} else {self.inner_center()}
+        if self.is_csc() {
+            self.outer_center()
+        } else {
+            self.inner_center()
+        }
     }
 
     fn row_center(&self) -> CsMatI<N, I> {
-        if self.is_csr() {self.outer_center()} else {self.inner_center()}
+        if self.is_csr() {
+            self.outer_center()
+        } else {
+            self.inner_center()
+        }
     }
 
     fn col_l1_norm(&self) -> CsVecI<N, I> {
-        if self.is_csc() {self.outer_l1_norm()} else {self.inner_l1_norm()}
+        if self.is_csc() {
+            self.outer_l1_norm()
+        } else {
+            self.inner_l1_norm()
+        }
     }
 
     fn row_l1_norm(&self) -> CsVecI<N, I> {
-        if self.is_csr() {self.outer_l1_norm()} else {self.inner_l1_norm()}
+        if self.is_csr() {
+            self.outer_l1_norm()
+        } else {
+            self.inner_l1_norm()
+        }
     }
-
 }
 
 #[cfg(test)]
@@ -162,30 +208,36 @@ mod tests {
     use super::{CsMatBaseExt, CsMatBaseHelp};
 
     lazy_static! {
-        static ref A_FLOAT: CsMatI<f64, usize> =  CsMatI::new_csc((5, 4),
-                                vec![0, 2, 2, 4, 5],
-                                vec![0, 1, 0, 3, 3],
-                                vec![3.14, 2.7, 1.62, 0.58, 4.67]);
-        static ref A_INT: CsMatI<i32, usize> = CsMatI::new_csc((5, 4),
-                                vec![0, 2, 2, 4, 5],
-                                vec![0, 1, 0, 3, 3],
-                                vec![1, 2, 3, 4, 5]);
-        static ref B_FLOAT: CsMatI<f64, usize> =  CsMatI::new((4, 5),
-                                vec![0, 2, 2, 4, 5],
-                                vec![0, 1, 0, 3, 3],
-                                vec![3.14, 2.7, 1.62, 0.58, 4.67]);
-        static ref B_INT: CsMatI<i32, usize> = CsMatI::new((4, 5),
-                                vec![0, 2, 2, 4, 5],
-                                vec![0, 1, 0, 3, 3],
-                                vec![1, 2, 3, 4, 5]);
+        static ref A_FLOAT: CsMatI<f64, usize> = CsMatI::new_csc(
+            (5, 4),
+            vec![0, 2, 2, 4, 5],
+            vec![0, 1, 0, 3, 3],
+            vec![3.14, 2.7, 1.62, 0.58, 4.67]
+        );
+        static ref A_INT: CsMatI<i32, usize> = CsMatI::new_csc(
+            (5, 4),
+            vec![0, 2, 2, 4, 5],
+            vec![0, 1, 0, 3, 3],
+            vec![1, 2, 3, 4, 5]
+        );
+        static ref B_FLOAT: CsMatI<f64, usize> = CsMatI::new(
+            (4, 5),
+            vec![0, 2, 2, 4, 5],
+            vec![0, 1, 0, 3, 3],
+            vec![3.14, 2.7, 1.62, 0.58, 4.67]
+        );
+        static ref B_INT: CsMatI<i32, usize> = CsMatI::new(
+            (4, 5),
+            vec![0, 2, 2, 4, 5],
+            vec![0, 1, 0, 3, 3],
+            vec![1, 2, 3, 4, 5]
+        );
     }
 
     #[test]
     fn test_int_sum() {
-        let outer = CsVecI::new(4, vec![0, 2, 3],
-                                vec![3, 7, 5]);
-        let inner = CsVecI::new(5, vec![0, 1, 3],
-                                vec![4, 2, 9]);
+        let outer = CsVecI::new(4, vec![0, 2, 3], vec![3, 7, 5]);
+        let inner = CsVecI::new(5, vec![0, 1, 3], vec![4, 2, 9]);
         assert_eq!(A_INT.col_sum(), outer);
         assert_eq!(A_INT.row_sum(), inner);
         assert_eq!(B_INT.col_sum(), inner);
@@ -194,10 +246,8 @@ mod tests {
 
     #[test]
     fn test_float_sum() {
-        let outer = CsVecI::new(4, vec![0, 2, 3],
-                                vec![5.84, 2.2, 4.67]);
-        let inner = CsVecI::new(5, vec![0, 1, 3],
-                                vec![4.76, 2.7, 5.25]);
+        let outer = CsVecI::new(4, vec![0, 2, 3], vec![5.84, 2.2, 4.67]);
+        let inner = CsVecI::new(5, vec![0, 1, 3], vec![4.76, 2.7, 5.25]);
         assert_eq!(A_FLOAT.col_sum(), outer);
         assert_eq!(A_FLOAT.row_sum(), inner);
         assert_eq!(B_FLOAT.col_sum(), inner);
@@ -206,10 +256,8 @@ mod tests {
 
     #[test]
     fn test_int_avg() {
-        let outer = CsVecI::new(4, vec![0, 2, 3],
-                                vec![1, 3, 5]);
-        let inner = CsVecI::new(5, vec![0, 1, 3],
-                                vec![2, 2, 4]);
+        let outer = CsVecI::new(4, vec![0, 2, 3], vec![1, 3, 5]);
+        let inner = CsVecI::new(5, vec![0, 1, 3], vec![2, 2, 4]);
         assert_eq!(A_INT.col_avg(), outer);
         assert_eq!(A_INT.row_avg(), inner);
         assert_eq!(B_INT.col_avg(), inner);
@@ -218,10 +266,8 @@ mod tests {
 
     #[test]
     fn test_float_avg() {
-        let outer = CsVecI::new(4, vec![0, 2, 3],
-                                vec![2.92, 1.1, 4.67]);
-        let inner = CsVecI::new(5, vec![0, 1, 3],
-                                vec![2.38, 2.7, 2.625]);
+        let outer = CsVecI::new(4, vec![0, 2, 3], vec![2.92, 1.1, 4.67]);
+        let inner = CsVecI::new(5, vec![0, 1, 3], vec![2.38, 2.7, 2.625]);
         assert_eq!(A_FLOAT.col_avg(), outer);
         assert_eq!(A_FLOAT.row_avg(), inner);
         assert_eq!(B_FLOAT.col_avg(), inner);
@@ -230,17 +276,41 @@ mod tests {
 
     #[test]
     fn test_int_center() {
-        let out_center = CsMatI::new_csc((5, 4),
-                                       vec![0, 2, 2, 4, 5],
-                                       vec![0, 1, 0, 3, 3],
-                                       vec![0, 1, 0, 1, 0]);
-        let in_center = CsMatI::new_csc((5, 4),
-                                          vec![0, 2, 2, 4, 5],
-                                          vec![0, 1, 0, 3, 3],
-                                          vec![-1, 0, 1, 0, 1]);
+        let out_center = CsMatI::new_csc(
+            (5, 4),
+            vec![0, 2, 2, 4, 5],
+            vec![0, 1, 0, 3, 3],
+            vec![0, 1, 0, 1, 0],
+        );
+        let in_center = CsMatI::new_csc(
+            (5, 4),
+            vec![0, 2, 2, 4, 5],
+            vec![0, 1, 0, 3, 3],
+            vec![-1, 0, 1, 0, 1],
+        );
         assert_eq!(A_INT.outer_center(), out_center);
         assert_eq!(A_INT.row_center(), in_center);
         assert_eq!(B_INT.col_center(), in_center.transpose_into());
         assert_eq!(B_INT.row_center(), out_center.transpose_into());
+    }
+
+    #[test]
+    fn test_float_center() {
+        let out_center = CsMatI::new_csc(
+            (5, 4),
+            vec![0, 2, 2, 4, 5],
+            vec![0, 1, 0, 3, 3],
+            vec![0, 1, 0, 1, 0],
+        );
+        let in_center = CsMatI::new_csc(
+            (5, 4),
+            vec![0, 2, 2, 4, 5],
+            vec![0, 1, 0, 3, 3],
+            vec![-1, 0, 1, 0, 1],
+        );
+        assert_eq!(A_FLOAT.outer_center(), out_center);
+        assert_eq!(A_FLOAT.row_center(), in_center);
+        assert_eq!(B_FLOAT.col_center(), in_center.transpose_into());
+        assert_eq!(B_FLOAT.row_center(), out_center.transpose_into());
     }
 }

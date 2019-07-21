@@ -3,8 +3,7 @@ use std::ops::Deref;
 use std::slice::Iter;
 
 use num_traits::{Num, Signed};
-use sprs::{CsVecBase, CsVecI};
-use sprs::SpIndex;
+use sprs::{CsVecBase, CsVecI, SpIndex};
 
 pub trait CsVecBaseExt<N, I> {
     fn ind_iter(&self) -> Iter<I>;
@@ -12,7 +11,9 @@ pub trait CsVecBaseExt<N, I> {
 
     fn ind_vec(&self) -> Vec<I>;
     fn data_vec(&self) -> Vec<N>;
-    fn data_fold<T>(&self, init: N, f: T) -> N where T: Fn(N, &N) -> N;
+    fn data_fold<T>(&self, init: N, f: T) -> N
+    where
+        T: Fn(N, &N) -> N;
     fn sum(&self) -> N;
     fn avg(&self) -> N;
     fn l1_norm(&self) -> N;
@@ -20,21 +21,32 @@ pub trait CsVecBaseExt<N, I> {
 }
 
 impl<N, I, IS, DS> CsVecBaseExt<N, I> for CsVecBase<IS, DS>
-where  I: SpIndex,
-       IS: Deref<Target = [I]>,
-       DS: Deref<Target = [N]>,
-       N: Num + Sum + Copy + Clone + Signed {
+where
+    I: SpIndex,
+    IS: Deref<Target = [I]>,
+    DS: Deref<Target = [N]>,
+    N: Num + Sum + Copy + Clone + Signed,
+{
+    fn ind_iter(&self) -> Iter<I> {
+        self.indices().iter()
+    }
 
+    fn data_iter(&self) -> Iter<N> {
+        self.data().iter()
+    }
 
-    fn ind_iter(&self) -> Iter<I> { self.indices().iter() }
+    fn ind_vec(&self) -> Vec<I> {
+        self.indices().to_vec()
+    }
 
-    fn data_iter(&self) -> Iter<N> { self.data().iter() }
+    fn data_vec(&self) -> Vec<N> {
+        self.data().to_vec()
+    }
 
-    fn ind_vec(&self) -> Vec<I> { self.indices().to_vec() }
-
-    fn data_vec(&self) -> Vec<N> { self.data().to_vec() }
-
-    fn data_fold<T>(&self, init: N, f: T) -> N where T: Fn(N, &N) -> N {
+    fn data_fold<T>(&self, init: N, f: T) -> N
+    where
+        T: Fn(N, &N) -> N,
+    {
         self.data_iter().fold(init, f)
     }
 
@@ -43,14 +55,17 @@ where  I: SpIndex,
         self.data_fold(N::zero(), s)
     }
 
-
     fn avg(&self) -> N {
         if self.nnz() != 0 {
-            self.sum()/vec![N::one(); self.nnz()].iter().map(|x| *x).sum()
-        } else { N::zero() }
+            self.sum() / vec![N::one(); self.nnz()].iter().map(|x| *x).sum()
+        } else {
+            N::zero()
+        }
     }
 
-    fn l1_norm(&self) -> N { self.data_fold(N::zero(), |s, &x| s + x.abs()) }
+    fn l1_norm(&self) -> N {
+        self.data_fold(N::zero(), |s, &x| s + x.abs())
+    }
 
     fn center(&self) -> CsVecI<N, I> {
         let avg = self.avg();
@@ -67,7 +82,8 @@ mod tests {
     use super::CsVecBaseExt;
 
     lazy_static! {
-        static ref V_FLOAT: CsVecI<f64, usize> = CsVecI::new(5, vec![0, 2, 4], vec![3.14, 2.70, 1.60]);
+        static ref V_FLOAT: CsVecI<f64, usize> =
+            CsVecI::new(5, vec![0, 2, 4], vec![3.14, 2.70, 1.60]);
         static ref V_INT: CsVecI<i32, usize> = CsVecI::new(5, vec![0, 2, 4], vec![3, 2, 1]);
     }
     #[test]
@@ -82,7 +98,7 @@ mod tests {
 
     #[test]
     fn test_float_avg() {
-        let v  = CsVecI::new(5, vec![0, 2, 4], vec![3.14f64, 2.7, 1.6]);
+        let v = CsVecI::new(5, vec![0, 2, 4], vec![3.14f64, 2.7, 1.6]);
         assert_approx_eq!(V_FLOAT.avg(), 2.48);
         let n: CsVecI<f64, usize> = CsVecI::new(6, Vec::new(), Vec::new());
         assert_eq!(n.avg(), 0.0)
@@ -90,7 +106,7 @@ mod tests {
 
     #[test]
     fn test_int_avg() {
-        let v  = CsVecI::new(5, vec![0, 2, 4], vec![3, 2, 1]);
+        let v = CsVecI::new(5, vec![0, 2, 4], vec![3, 2, 1]);
         assert_eq!(V_INT.avg(), 2);
         let n: CsVecI<i32, usize> = CsVecI::new(6, Vec::new(), Vec::new());
         assert_eq!(n.avg(), 0)
@@ -98,14 +114,14 @@ mod tests {
 
     #[test]
     fn test_int_norm() {
-        let v  = CsVecI::new(5, vec![0, 2, 4], vec![-3, -2, -1]);
+        let v = CsVecI::new(5, vec![0, 2, 4], vec![-3, -2, -1]);
         assert_eq!(V_INT.l1_norm(), 6);
         assert_eq!(v.l1_norm(), 6);
     }
 
     #[test]
     fn test_float_norm() {
-        let v  = CsVecI::new(5, vec![0, 2, 4], vec![-3.14f64, -2.7, -1.6]);
+        let v = CsVecI::new(5, vec![0, 2, 4], vec![-3.14f64, -2.7, -1.6]);
         assert_approx_eq!(V_FLOAT.l1_norm(), 7.44f64);
         assert_approx_eq!(v.l1_norm(), 7.44f64);
     }
