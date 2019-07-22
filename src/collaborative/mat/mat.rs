@@ -302,25 +302,49 @@ mod tests {
             (5, 4),
             vec![0, 2, 2, 4, 5],
             vec![0, 1, 0, 3, 3],
-            vec![0.22, -0.22, 0.52, -0.52, 0.0]
+            vec![0.22, -0.22, 0.52, -0.52, 0.0],
         );
         let in_center: CsMatI<f64, usize> = CsMatI::new_csc(
             (5, 4),
             vec![0, 2, 2, 4, 5],
             vec![0, 1, 0, 3, 3],
-            vec![0.76, 0.0, -0.76, -2.045, 2.045]
+            vec![0.76, 0.0, -0.76, -2.045, 2.045],
         );
         assert_eq!(A_FLOAT.col_center().ind_vec(), out_center.ind_vec());
         assert_eq!(A_FLOAT.row_center().ind_vec(), in_center.ind_vec());
-        assert_eq!(B_FLOAT.col_center().ind_vec(), in_center.transpose_view().ind_vec());
-        assert_eq!(B_FLOAT.row_center().ind_vec(), out_center.transpose_view().ind_vec());
+        assert_eq!(
+            B_FLOAT.col_center().ind_vec(),
+            in_center.transpose_view().ind_vec()
+        );
+        assert_eq!(
+            B_FLOAT.row_center().ind_vec(),
+            out_center.transpose_view().ind_vec()
+        );
         assert_eq!(A_FLOAT.col_center().ip_vec(), out_center.ip_vec());
         assert_eq!(A_FLOAT.row_center().ip_vec(), in_center.ip_vec());
-        assert_eq!(B_FLOAT.col_center().ip_vec(), in_center.transpose_view().ip_vec());
-        assert_eq!(B_FLOAT.row_center().ip_vec(), out_center.transpose_view().ip_vec());
-        (&A_FLOAT.col_center() - &out_center).data_vec().iter().for_each(|x| assert_approx_eq!(x, 0.0));
-        (&A_FLOAT.row_center() - &in_center).data_vec().iter().for_each(|x| assert_approx_eq!(x, 0.0));
-        (&B_FLOAT.col_center() - &in_center.transpose_view()).data_vec().iter().for_each(|x| assert_approx_eq!(x, 0.0));
-        (&B_FLOAT.row_center() - &out_center.transpose_view()).data_vec().iter().for_each(|x| assert_approx_eq!(x, 0.0));
+        assert_eq!(
+            B_FLOAT.col_center().ip_vec(),
+            in_center.transpose_view().ip_vec()
+        );
+        assert_eq!(
+            B_FLOAT.row_center().ip_vec(),
+            out_center.transpose_view().ip_vec()
+        );
+        (&A_FLOAT.col_center() - &out_center)
+            .data_vec()
+            .iter()
+            .for_each(|x| assert_approx_eq!(x, 0.0));
+        (&A_FLOAT.row_center() - &in_center)
+            .data_vec()
+            .iter()
+            .for_each(|x| assert_approx_eq!(x, 0.0));
+        (&B_FLOAT.col_center() - &in_center.transpose_view())
+            .data_vec()
+            .iter()
+            .for_each(|x| assert_approx_eq!(x, 0.0));
+        (&B_FLOAT.row_center() - &out_center.transpose_view())
+            .data_vec()
+            .iter()
+            .for_each(|x| assert_approx_eq!(x, 0.0));
     }
 }
