@@ -5,6 +5,8 @@ use std::slice::Iter;
 use num_traits::{Num, Signed};
 use sprs::{CsVecBase, CsVecI, SpIndex};
 
+use super::Value;
+
 pub trait CsVecBaseExt<N, I> {
     fn ind_iter(&self) -> Iter<I>;
     fn data_iter(&self) -> Iter<N>;
@@ -25,7 +27,7 @@ where
     I: SpIndex,
     IS: Deref<Target = [I]>,
     DS: Deref<Target = [N]>,
-    N: Num + Sum + Copy + Clone + Signed,
+    N: Value,
 {
     fn ind_iter(&self) -> Iter<I> {
         self.indices().iter()

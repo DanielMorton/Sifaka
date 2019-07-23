@@ -4,7 +4,7 @@ use std::ops::Deref;
 use num_traits::{Float, Num, Signed};
 use sprs::{CsMatBase, CsMatI, CsVecI, SpIndex};
 
-use super::{CsMatBaseExt, CsVecBaseExt, CsVecFloat};
+use super::{CsMatBaseExt, CsVecBaseExt, CsVecFloat, Value};
 
 trait CSMatFloatHelp<N, I>: CsMatBaseExt<N, I>
 where
@@ -22,7 +22,7 @@ where
     I: SpIndex,
     IS: Deref<Target = [I]>,
     DS: Deref<Target = [N]>,
-    N: Num + Sum + Clone + Copy + Signed + Default + Float,
+    N: Value + Default + Float,
 {
     fn outer_l2_norm(&self) -> CsVecI<N, I> {
         let mut ind_vec: Vec<I> = Vec::new();
@@ -74,7 +74,7 @@ where
     I: SpIndex,
     IS: Deref<Target = [I]>,
     DS: Deref<Target = [N]>,
-    N: Num + Sum + Clone + Copy + Signed + Default + Float,
+    N: Value + Default + Float,
 {
     fn col_l2_norm(&self) -> CsVecI<N, I> {
         if self.is_csc() {

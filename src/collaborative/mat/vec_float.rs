@@ -4,7 +4,7 @@ use std::ops::Deref;
 use num_traits::{Float, Num, Signed};
 use sprs::{CsVecBase, CsVecI, SpIndex};
 
-use super::CsVecBaseExt;
+use super::{CsVecBaseExt, Value};
 
 pub trait CsVecFloat<N, I>: CsVecBaseExt<N, I> {
     fn l2_norm(&self) -> N;
@@ -16,7 +16,7 @@ where
     I: SpIndex,
     IS: Deref<Target = [I]>,
     DS: Deref<Target = [N]>,
-    N: Num + Sum + Signed + Float,
+    N: Value + Float,
 {
     fn l2_norm(&self) -> N {
         self.data_fold(N::zero(), |s, &x| s + x * x).sqrt()

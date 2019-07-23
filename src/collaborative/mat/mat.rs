@@ -4,7 +4,7 @@ use std::ops::Deref;
 use num_traits::{Num, Signed};
 use sprs::{CsMatBase, CsMatI, CsVecI, SpIndex};
 
-use super::CsVecBaseExt;
+use super::{CsVecBaseExt, Value};
 
 trait CsMatBaseHelp<N, I>
 where
@@ -26,7 +26,7 @@ where
     I: SpIndex,
     IS: Deref<Target = [I]>,
     DS: Deref<Target = [N]>,
-    N: Num + Sum + Clone + Copy + Signed + Default,
+    N: Value + Default,
 {
     fn outer_sum(&self) -> CsVecI<N, I> {
         let mut ind_vec: Vec<I> = Vec::new();
@@ -122,7 +122,7 @@ where
     I: SpIndex,
     IS: Deref<Target = [I]>,
     DS: Deref<Target = [N]>,
-    N: Num + Sum + Clone + Copy + Signed + Default,
+    N: Value + Default,
 {
     fn ip_vec(&self) -> Vec<I> {
         self.indptr().to_vec()
