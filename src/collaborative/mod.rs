@@ -1,5 +1,5 @@
 pub use cor_type::Correlation;
-pub use correlation::correlation;
+pub use correlation::{item_correlation, user_correlation};
 pub use mat::{CsMatBaseExt, CsMatFloat, CsVecBaseExt, CsVecFloat};
 pub use recommender_type::RecommenderType;
 
