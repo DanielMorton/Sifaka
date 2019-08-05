@@ -12,5 +12,5 @@ pub mod mat_float;
 pub mod vec;
 pub mod vec_float;
 
-pub trait Value: Num + Sum + Copy + Clone + Signed {}
-impl<T> Value for T where T: Num + Sum + Copy + Clone + Signed {}
+pub trait Value: Num + Sum + Copy + Clone + Signed + PartialOrd {}
+impl<T> Value for T where T: Num + Sum + Copy + Clone + Signed + PartialOrd {}
