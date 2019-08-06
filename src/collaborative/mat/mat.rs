@@ -14,11 +14,13 @@ where
     fn outer_avg(&self) -> CsVecI<N, I>;
     fn outer_center(&self) -> CsMatI<N, I>;
     fn outer_l1_norm(&self) -> CsVecI<N, I>;
+    fn outer_top_n(&self, n:usize, pos: bool) -> CsMatI<N, I>;
 
     fn inner_sum(&self) -> CsVecI<N, I>;
     fn inner_avg(&self) -> CsVecI<N, I>;
     fn inner_center(&self) -> CsMatI<N, I>;
     fn inner_l1_norm(&self) -> CsVecI<N, I>;
+    fn inner_top_n(&self, n:usize, pos: bool) -> CsMatI<N, I>;
 }
 
 impl<N, I, IS, DS> CsMatBaseHelp<N, I> for CsMatBase<N, I, IS, IS, DS>
@@ -79,6 +81,23 @@ where
         CsVecI::new(self.outer_dims(), ind_vec, avg_vec)
     }
 
+    fn outer_top_n(&self, n: usize, pos: bool) -> CsMatI<N, I> {
+        let mut ip_vec: Vec<I> = Vec::new();
+        let mut ind_vec: Vec<I> = Vec::new();
+        let mut data: Vec<N> = Vec::new();
+        for (_, vec) in self.outer_iterator().enumerate() {
+            let top_n_vec = vec.top_n(n, pos);
+            ind_vec.append(&mut top_n_vec.ind_vec());
+            data.append(&mut top_n_vec.data_vec());
+            ip_vec.push(SpIndex::from_usize(top_n_vec.nnz()));
+        }
+        if self.is_csc() {
+            CsMatI::new_csc(self.shape(), ip_vec, ind_vec, data)
+        } else {
+            CsMatI::new(self.shape(), ip_vec, ind_vec, data)
+        }
+    }
+
     fn inner_sum(&self) -> CsVecI<N, I> {
         self.to_other_storage().outer_sum()
     }
@@ -93,6 +112,10 @@ where
 
     fn inner_l1_norm(&self) -> CsVecI<N, I> {
         self.to_other_storage().outer_l1_norm()
+    }
+
+    fn inner_top_n(&self, n: usize, pos: bool) -> CsMatI<N, I> {
+        self.to_other_storage().outer_top_n(n, pos)
     }
 }
 
@@ -115,6 +138,9 @@ where
 
     fn col_l1_norm(&self) -> CsVecI<N, I>;
     fn row_l1_norm(&self) -> CsVecI<N, I>;
+
+    fn col_top_n(&self, n: usize, pos: bool) -> CsMatI<N, I>;
+    fn row_top_n(&self, n: usize, pos: bool) -> CsMatI<N, I>;
 }
 
 impl<N, I, IS, DS> CsMatBaseExt<N, I> for CsMatBase<N, I, IS, IS, DS>
@@ -197,6 +223,22 @@ where
             self.outer_l1_norm()
         } else {
             self.inner_l1_norm()
+        }
+    }
+
+    fn col_top_n(&self, n: usize, pos: bool) -> CsMatI<N, I> {
+        if self.is_csc() {
+            self.outer_top_n(n, pos)
+        } else {
+            self.inner_top_n(n, pos)
+        }
+    }
+
+    fn row_top_n(&self, n: usize, pos: bool) -> CsMatI<N, I> {
+        if self.is_csr() {
+            self.outer_top_n(n, pos)
+        } else {
+            self.inner_top_n(n, pos)
         }
     }
 }
