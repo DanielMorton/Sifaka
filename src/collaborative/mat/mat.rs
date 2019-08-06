@@ -14,13 +14,13 @@ where
     fn outer_avg(&self) -> CsVecI<N, I>;
     fn outer_center(&self) -> CsMatI<N, I>;
     fn outer_l1_norm(&self) -> CsVecI<N, I>;
-    fn outer_top_n(&self, n:usize, pos: bool) -> CsMatI<N, I>;
+    fn outer_top_n(&self, n: usize, pos: bool) -> CsMatI<N, I>;
 
     fn inner_sum(&self) -> CsVecI<N, I>;
     fn inner_avg(&self) -> CsVecI<N, I>;
     fn inner_center(&self) -> CsMatI<N, I>;
     fn inner_l1_norm(&self) -> CsVecI<N, I>;
-    fn inner_top_n(&self, n:usize, pos: bool) -> CsMatI<N, I>;
+    fn inner_top_n(&self, n: usize, pos: bool) -> CsMatI<N, I>;
 }
 
 impl<N, I, IS, DS> CsMatBaseHelp<N, I> for CsMatBase<N, I, IS, IS, DS>

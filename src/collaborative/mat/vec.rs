@@ -85,8 +85,11 @@ where
         if pos {
             pairs = pairs.into_iter().filter(|p| p.1 > &N::zero()).collect();
         }
-        CsVecI::new(self.dim(), pairs[..n].iter().map(|p| *p.0).collect(),
-                    pairs[..n].iter().map(|p| *p.1).collect())
+        CsVecI::new(
+            self.dim(),
+            pairs[..n].iter().map(|p| *p.0).collect(),
+            pairs[..n].iter().map(|p| *p.1).collect(),
+        )
     }
 
     fn top_n_positive(&self, n: usize) -> CsVecI<N, I> {
