@@ -115,7 +115,7 @@ where
     }
 
     fn inner_top_n(&self, n: usize, pos: bool) -> CsMatI<N, I> {
-        self.to_other_storage().outer_top_n(n, pos)
+        self.to_other_storage().outer_top_n(n, pos).to_other_storage()
     }
 }
 
