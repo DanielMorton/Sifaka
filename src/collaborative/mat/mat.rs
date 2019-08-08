@@ -1,7 +1,6 @@
-use std::iter::Sum;
 use std::ops::Deref;
 
-use num_traits::{Num, Signed};
+use num_traits::Num;
 use sprs::{CsMatBase, CsMatI, CsVecI, SpIndex};
 
 use super::{CsVecBaseExt, Value};
@@ -89,7 +88,7 @@ where
             let top_n_vec = vec.top_n(n, pos);
             ind_vec.append(&mut top_n_vec.ind_vec());
             data.append(&mut top_n_vec.data_vec());
-            ip_vec.push(SpIndex::from_usize(top_n_vec.nnz()));
+            ip_vec.push(SpIndex::from_usize(ind_vec.len()));
         }
         if self.is_csc() {
             CsMatI::new_csc(self.shape(), ip_vec, ind_vec, data)
@@ -115,7 +114,9 @@ where
     }
 
     fn inner_top_n(&self, n: usize, pos: bool) -> CsMatI<N, I> {
-        self.to_other_storage().outer_top_n(n, pos).to_other_storage()
+        self.to_other_storage()
+            .outer_top_n(n, pos)
+            .to_other_storage()
     }
 }
 
@@ -141,6 +142,8 @@ where
 
     fn col_top_n(&self, n: usize, pos: bool) -> CsMatI<N, I>;
     fn row_top_n(&self, n: usize, pos: bool) -> CsMatI<N, I>;
+
+    fn threshold(&self, n: N) -> CsMatI<N, I>;
 }
 
 impl<N, I, IS, DS> CsMatBaseExt<N, I> for CsMatBase<N, I, IS, IS, DS>
@@ -239,6 +242,23 @@ where
             self.outer_top_n(n, pos)
         } else {
             self.inner_top_n(n, pos)
+        }
+    }
+
+    fn threshold(&self, n: N) -> CsMatI<N, I> {
+        let mut ip_vec: Vec<I> = Vec::new();
+        let mut ind_vec: Vec<I> = Vec::new();
+        let mut data: Vec<N> = Vec::new();
+        for (_, vec) in self.outer_iterator().enumerate() {
+            let threshold_vec = vec.threshold(n);
+            ind_vec.append(&mut threshold_vec.ind_vec());
+            data.append(&mut threshold_vec.data_vec());
+            ip_vec.push(SpIndex::from_usize(ind_vec.len()));
+        }
+        if self.is_csc() {
+            CsMatI::new_csc(self.shape(), ip_vec, ind_vec, data)
+        } else {
+            CsMatI::new(self.shape(), ip_vec, ind_vec, data)
         }
     }
 }

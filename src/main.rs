@@ -4,8 +4,6 @@ extern crate lazy_static;
 use sprs::{CsMatI, CsVec};
 
 use collaborative::{CsMatBaseExt, CsVecBaseExt};
-use collaborative::Correlation::Cosine;
-use collaborative::RecommenderType::ItemItem;
 
 mod collaborative;
 

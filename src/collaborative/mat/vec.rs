@@ -1,10 +1,8 @@
-use std::iter::Sum;
 use std::ops::Deref;
 use std::slice::Iter;
 
-use num_traits::{Num, Signed};
+use num_traits::Num;
 use sprs::{CsVecBase, CsVecI, SpIndex};
-use sprs::vec::IntoSparseVecIter;
 
 use super::Value;
 
@@ -24,6 +22,7 @@ pub trait CsVecBaseExt<N, I> {
 
     fn top_n(&self, n: usize, pos: bool) -> CsVecI<N, I>;
     fn top_n_positive(&self, n: usize) -> CsVecI<N, I>;
+    fn threshold(&self, n: N) -> CsVecI<N, I>;
 }
 
 impl<N, I, IS, DS> CsVecBaseExt<N, I> for CsVecBase<IS, DS>
@@ -94,6 +93,20 @@ where
 
     fn top_n_positive(&self, n: usize) -> CsVecI<N, I> {
         self.top_n(n, true)
+    }
+
+    fn threshold(&self, n: N) -> CsVecI<N, I> {
+        let pairs: Vec<(&I, &N)> = self
+            .ind_iter()
+            .zip(self.data_iter())
+            .filter(|p| p.1 >= &n)
+            .collect();
+
+        CsVecI::new(
+            self.dim(),
+            pairs.iter().map(|p| *p.0).collect(),
+            pairs.iter().map(|p| *p.1).collect(),
+        )
     }
 }
 
