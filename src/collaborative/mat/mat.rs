@@ -1,7 +1,7 @@
 use std::ops::Deref;
 
 use num_traits::Num;
-use sprs::{CsMatBase, CsMatI, CsVecI, SpIndex};
+use sprs::{CsMatBase, CsMatI, CsVecBase, CsVecI, SpIndex};
 
 use super::{CsVecBaseExt, Value};
 
@@ -9,6 +9,9 @@ trait CsMatBaseHelp<N, I>
 where
     I: SpIndex,
 {
+
+    fn outer_agg<F: Copy>(&self, func: F) -> CsVecI<N, I>
+        where F: Fn(&CsVecI<N, I>) -> N;
     fn outer_sum(&self) -> CsVecI<N, I>;
     fn outer_avg(&self) -> CsVecI<N, I>;
     fn outer_center(&self) -> CsMatI<N, I>;
@@ -29,30 +32,30 @@ where
     DS: Deref<Target = [N]>,
     N: Value + Default,
 {
-    fn outer_sum(&self) -> CsVecI<N, I> {
+    fn outer_agg<F: Copy>(&self, func: F) -> CsVecI<N, I>
+        where F: Fn(&CsVecI<N, I>) -> N {
         let mut ind_vec: Vec<I> = Vec::new();
-        let mut sum_vec: Vec<N> = Vec::new();
+        let mut agg_vec: Vec<N> = Vec::new();
         for (ind, vec) in self.outer_iterator().enumerate() {
-            let v = vec.sum();
+            let v = func(&vec.to_owned());
             if v != N::zero() {
                 ind_vec.push(SpIndex::from_usize(ind));
-                sum_vec.push(v);
+                agg_vec.push(v);
             }
         }
-        CsVecI::new(self.outer_dims(), ind_vec, sum_vec)
+        CsVecI::new(self.outer_dims(), ind_vec, agg_vec)
+    }
+
+    fn outer_sum(&self) -> CsVecI<N, I> {
+        self.outer_agg(CsVecBase::sum)
     }
 
     fn outer_avg(&self) -> CsVecI<N, I> {
-        let mut ind_vec: Vec<I> = Vec::new();
-        let mut avg_vec: Vec<N> = Vec::new();
-        for (ind, vec) in self.outer_iterator().enumerate() {
-            let v = vec.avg();
-            if v != N::zero() {
-                ind_vec.push(SpIndex::from_usize(ind));
-                avg_vec.push(v);
-            }
-        }
-        CsVecI::new(self.outer_dims(), ind_vec, avg_vec)
+        self.outer_agg(CsVecBase::avg)
+    }
+
+    fn outer_l1_norm(&self) -> CsVecI<N, I> {
+        self.outer_agg(CsVecBase::l1_norm)
     }
 
     fn outer_center(&self) -> CsMatI<N, I> {
@@ -65,19 +68,6 @@ where
         } else {
             CsMatI::new(self.shape(), self.ip_vec(), self.ind_vec(), data)
         }
-    }
-
-    fn outer_l1_norm(&self) -> CsVecI<N, I> {
-        let mut ind_vec: Vec<I> = Vec::new();
-        let mut avg_vec: Vec<N> = Vec::new();
-        for (ind, vec) in self.outer_iterator().enumerate() {
-            let v = vec.l1_norm();
-            if v != N::zero() {
-                ind_vec.push(SpIndex::from_usize(ind));
-                avg_vec.push(v);
-            }
-        }
-        CsVecI::new(self.outer_dims(), ind_vec, avg_vec)
     }
 
     fn outer_top_n(&self, n: usize, pos: bool) -> CsMatI<N, I> {
