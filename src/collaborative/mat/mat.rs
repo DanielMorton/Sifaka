@@ -25,8 +25,9 @@ where
 
     fn inner_sum(&self) -> CsVecI<N, I>;
     fn inner_avg(&self) -> CsVecI<N, I>;
-    fn inner_center(&self) -> CsMatI<N, I>;
     fn inner_l1_norm(&self) -> CsVecI<N, I>;
+
+    fn inner_center(&self) -> CsMatI<N, I>;
     fn inner_top_n(&self, n: usize, pos: bool) -> CsMatI<N, I>;
 }
 
@@ -51,18 +52,6 @@ where
         CsVecI::new(self.outer_dims(), ind_vec, agg_vec)
     }
 
-    fn outer_sum(&self) -> CsVecI<N, I> {
-        self.outer_agg(CsVecBase::sum)
-    }
-
-    fn outer_avg(&self) -> CsVecI<N, I> {
-        self.outer_agg(CsVecBase::avg)
-    }
-
-    fn outer_l1_norm(&self) -> CsVecI<N, I> {
-        self.outer_agg(CsVecBase::l1_norm)
-    }
-
     fn outer_transform<'a, F: Copy>(&'a self, func: F) -> CsMatI<N, I>
         where F: Fn(&CsVecBase<&'a [I], &'a [N]>) -> CsVecI<N, I> {
         let mut data: Vec<N> = Vec::new();
@@ -74,6 +63,18 @@ where
         } else {
             CsMatI::new(self.shape(), self.ip_vec(), self.ind_vec(), data)
         }
+    }
+
+    fn outer_sum(&self) -> CsVecI<N, I> {
+        self.outer_agg(CsVecBase::sum)
+    }
+
+    fn outer_avg(&self) -> CsVecI<N, I> {
+        self.outer_agg(CsVecBase::avg)
+    }
+
+    fn outer_l1_norm(&self) -> CsVecI<N, I> {
+        self.outer_agg(CsVecBase::l1_norm)
     }
 
     fn outer_center(&self) -> CsMatI<N, I> {
@@ -105,12 +106,12 @@ where
         self.to_other_storage().outer_avg()
     }
 
-    fn inner_center(&self) -> CsMatI<N, I> {
-        self.to_other_storage().outer_center().to_other_storage()
-    }
-
     fn inner_l1_norm(&self) -> CsVecI<N, I> {
         self.to_other_storage().outer_l1_norm()
+    }
+
+    fn inner_center(&self) -> CsMatI<N, I> {
+        self.to_other_storage().outer_center().to_other_storage()
     }
 
     fn inner_top_n(&self, n: usize, pos: bool) -> CsMatI<N, I> {
