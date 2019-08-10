@@ -80,14 +80,17 @@ where
     fn top_n(&self, n: usize, pos: bool) -> CsVecI<N, I> {
         let mut pairs: Vec<(&I, &N)> = self.ind_iter().zip(self.data_iter()).collect();
         pairs.sort_by(|a, b| (b.1).partial_cmp(a.1).unwrap());
+        pairs = pairs[..n].to_vec();
 
         if pos {
             pairs = pairs.into_iter().filter(|p| p.1 > &N::zero()).collect();
         }
+
+        pairs.sort_by(|a, b| (a.0).partial_cmp(b.0).unwrap());
         CsVecI::new(
             self.dim(),
-            pairs[..n].iter().map(|p| *p.0).collect(),
-            pairs[..n].iter().map(|p| *p.1).collect(),
+            pairs.iter().map(|p| *p.0).collect(),
+            pairs.iter().map(|p| *p.1).collect(),
         )
     }
 

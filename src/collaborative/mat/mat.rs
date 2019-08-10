@@ -12,10 +12,15 @@ where
 
     fn outer_agg<'a, F: Copy>(&'a self, func: F) -> CsVecI<N, I>
         where F: Fn(&CsVecBase<&'a [I], &'a [N]>) -> N;
+
+    fn outer_transform<'a, F: Copy>(&'a self, func: F) -> CsMatI<N, I>
+        where F: Fn(&CsVecBase<&'a [I], &'a [N]>) -> CsVecI<N, I>;
+
     fn outer_sum(&self) -> CsVecI<N, I>;
     fn outer_avg(&self) -> CsVecI<N, I>;
-    fn outer_center(&self) -> CsMatI<N, I>;
     fn outer_l1_norm(&self) -> CsVecI<N, I>;
+
+    fn outer_center(&self) -> CsMatI<N, I>;
     fn outer_top_n(&self, n: usize, pos: bool) -> CsMatI<N, I>;
 
     fn inner_sum(&self) -> CsVecI<N, I>;
@@ -58,16 +63,21 @@ where
         self.outer_agg(CsVecBase::l1_norm)
     }
 
-    fn outer_center(&self) -> CsMatI<N, I> {
+    fn outer_transform<'a, F: Copy>(&'a self, func: F) -> CsMatI<N, I>
+        where F: Fn(&CsVecBase<&'a [I], &'a [N]>) -> CsVecI<N, I> {
         let mut data: Vec<N> = Vec::new();
         for (_, vec) in self.outer_iterator().enumerate() {
-            data.append(&mut vec.center().data_vec());
+            data.append(&mut func(&vec).data_vec());
         }
         if self.is_csc() {
             CsMatI::new_csc(self.shape(), self.ip_vec(), self.ind_vec(), data)
         } else {
             CsMatI::new(self.shape(), self.ip_vec(), self.ind_vec(), data)
         }
+    }
+
+    fn outer_center(&self) -> CsMatI<N, I> {
+        self.outer_transform(CsVecBase::center)
     }
 
     fn outer_top_n(&self, n: usize, pos: bool) -> CsMatI<N, I> {
