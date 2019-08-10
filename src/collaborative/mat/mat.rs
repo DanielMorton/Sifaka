@@ -10,8 +10,8 @@ where
     I: SpIndex,
 {
 
-    fn outer_agg<F: Copy>(&self, func: F) -> CsVecI<N, I>
-        where F: Fn(&CsVecI<N, I>) -> N;
+    fn outer_agg<'a, F: Copy>(&'a self, func: F) -> CsVecI<N, I>
+        where F: Fn(&CsVecBase<&'a [I], &'a [N]>) -> N;
     fn outer_sum(&self) -> CsVecI<N, I>;
     fn outer_avg(&self) -> CsVecI<N, I>;
     fn outer_center(&self) -> CsMatI<N, I>;
@@ -32,12 +32,12 @@ where
     DS: Deref<Target = [N]>,
     N: Value + Default,
 {
-    fn outer_agg<F: Copy>(&self, func: F) -> CsVecI<N, I>
-        where F: Fn(&CsVecI<N, I>) -> N {
+    fn outer_agg<'a, F: Copy>(&'a self, func: F) -> CsVecI<N, I>
+        where F: Fn(&CsVecBase<&'a [I], &'a [N]>) -> N {
         let mut ind_vec: Vec<I> = Vec::new();
         let mut agg_vec: Vec<N> = Vec::new();
         for (ind, vec) in self.outer_iterator().enumerate() {
-            let v = func(&vec.to_owned());
+            let v = func(&vec);
             if v != N::zero() {
                 ind_vec.push(SpIndex::from_usize(ind));
                 agg_vec.push(v);
