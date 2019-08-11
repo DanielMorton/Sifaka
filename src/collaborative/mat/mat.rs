@@ -5,7 +5,7 @@ use sprs::{CsMatBase, CsMatI, CsVecBase, CsVecI, SpIndex};
 
 use super::{CsVecBaseExt, Value};
 
-trait CsMatBaseHelp<N, I>
+pub(super) trait CsMatBaseHelp<N, I>
 where
     I: SpIndex,
 {

@@ -3,6 +3,7 @@ use std::iter::Sum;
 use num_traits::{Num, Signed};
 
 pub use mat::CsMatBaseExt;
+use mat::CsMatBaseHelp;
 pub use mat_float::CsMatFloat;
 pub use vec::CsVecBaseExt;
 pub use vec_float::CsVecFloat;

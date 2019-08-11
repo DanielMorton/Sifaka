@@ -1,4 +1,3 @@
-use std::iter::Sum;
 use std::ops::Deref;
 
 use num_traits::{Float, Num, Signed};

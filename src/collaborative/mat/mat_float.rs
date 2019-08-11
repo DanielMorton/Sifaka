@@ -1,10 +1,10 @@
 use std::iter::Sum;
 use std::ops::Deref;
 
-use num_traits::{Float, Num, Signed};
-use sprs::{CsMatBase, CsMatI, CsVecI, SpIndex};
+use num_traits::Float;
+use sprs::{CsMatBase, CsMatI, CsVecBase, CsVecI, SpIndex};
 
-use super::{CsMatBaseExt, CsVecBaseExt, CsVecFloat, Value};
+use super::{CsMatBaseExt, CsMatBaseHelp, CsVecBaseExt, CsVecFloat, Value};
 
 trait CSMatFloatHelp<N, I>: CsMatBaseExt<N, I>
 where
@@ -25,16 +25,7 @@ where
     N: Value + Default + Float,
 {
     fn outer_l2_norm(&self) -> CsVecI<N, I> {
-        let mut ind_vec: Vec<I> = Vec::new();
-        let mut norm_vec: Vec<N> = Vec::new();
-        for (ind, vec) in self.outer_iterator().enumerate() {
-            let v = vec.l2_norm();
-            if v != N::zero() {
-                ind_vec.push(SpIndex::from_usize(ind));
-                norm_vec.push(v);
-            }
-        }
-        CsVecI::new(self.outer_dims(), ind_vec, norm_vec)
+        self.outer_agg(CsVecBase::l2_norm)
     }
 
     fn outer_normalize(&self) -> CsMatI<N, I> {
