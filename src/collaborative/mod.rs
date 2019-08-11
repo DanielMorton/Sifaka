@@ -5,7 +5,7 @@ pub use recommender_type::RecommenderType;
 
 pub use crate::collaborative::mat::Value;
 
-pub mod algorithms;
-pub mod correlation;
-pub mod mat;
-pub mod recommender_type;
+mod algorithms;
+mod correlation;
+mod mat;
+mod recommender_type;
