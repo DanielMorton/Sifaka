@@ -6,7 +6,9 @@ pub(super) trait Predictor<N, I>
 where
     I: SpIndex,
 {
-    fn new(user_item: &CsMatI<N, I>, neighbors: I, correlation: Correlation) -> Self;
+    fn new(user_item: &CsMatI<N, I>,
+           neighbors: I,
+           correlation: Correlation) -> Self;
 
     //    fn predict(&self, user: &I, item: &I) -> N;
 
