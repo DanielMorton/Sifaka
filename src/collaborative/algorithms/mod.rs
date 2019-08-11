@@ -1,5 +1,8 @@
 pub use correlation::Correlation;
-pub use predictor::Predictor;
+use predictor::Predictor;
+
+pub use super::{CsMatBaseExt, CsMatFloat, Value};
 
 pub mod correlation;
 pub mod predictor;
+pub mod user_user;

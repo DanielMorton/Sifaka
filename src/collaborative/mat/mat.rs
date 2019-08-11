@@ -21,14 +21,14 @@ where
     fn outer_l1_norm(&self) -> CsVecI<N, I>;
 
     fn outer_center(&self) -> CsMatI<N, I>;
-    fn outer_top_n(&self, n: usize, pos: bool) -> CsMatI<N, I>;
+    fn outer_top_n(&self, n: I, pos: bool) -> CsMatI<N, I>;
 
     fn inner_sum(&self) -> CsVecI<N, I>;
     fn inner_avg(&self) -> CsVecI<N, I>;
     fn inner_l1_norm(&self) -> CsVecI<N, I>;
 
     fn inner_center(&self) -> CsMatI<N, I>;
-    fn inner_top_n(&self, n: usize, pos: bool) -> CsMatI<N, I>;
+    fn inner_top_n(&self, n: I, pos: bool) -> CsMatI<N, I>;
 }
 
 impl<N, I, IS, DS> CsMatBaseHelp<N, I> for CsMatBase<N, I, IS, IS, DS>
@@ -85,7 +85,7 @@ where
         self.outer_transform(CsVecBase::center)
     }
 
-    fn outer_top_n(&self, n: usize, pos: bool) -> CsMatI<N, I> {
+    fn outer_top_n(&self, n: I, pos: bool) -> CsMatI<N, I> {
         let mut ip_vec: Vec<I> = Vec::new();
         let mut ind_vec: Vec<I> = Vec::new();
         let mut data: Vec<N> = Vec::new();
@@ -118,7 +118,7 @@ where
         self.to_other_storage().outer_center().to_other_storage()
     }
 
-    fn inner_top_n(&self, n: usize, pos: bool) -> CsMatI<N, I> {
+    fn inner_top_n(&self, n: I, pos: bool) -> CsMatI<N, I> {
         self.to_other_storage()
             .outer_top_n(n, pos)
             .to_other_storage()
@@ -145,8 +145,8 @@ where
     fn col_l1_norm(&self) -> CsVecI<N, I>;
     fn row_l1_norm(&self) -> CsVecI<N, I>;
 
-    fn col_top_n(&self, n: usize, pos: bool) -> CsMatI<N, I>;
-    fn row_top_n(&self, n: usize, pos: bool) -> CsMatI<N, I>;
+    fn col_top_n(&self, n: I, pos: bool) -> CsMatI<N, I>;
+    fn row_top_n(&self, n: I, pos: bool) -> CsMatI<N, I>;
 
     fn threshold(&self, n: N) -> CsMatI<N, I>;
 }
@@ -234,7 +234,7 @@ where
         }
     }
 
-    fn col_top_n(&self, n: usize, pos: bool) -> CsMatI<N, I> {
+    fn col_top_n(&self, n: I, pos: bool) -> CsMatI<N, I> {
         if self.is_csc() {
             self.outer_top_n(n, pos)
         } else {
@@ -242,7 +242,7 @@ where
         }
     }
 
-    fn row_top_n(&self, n: usize, pos: bool) -> CsMatI<N, I> {
+    fn row_top_n(&self, n: I, pos: bool) -> CsMatI<N, I> {
         if self.is_csr() {
             self.outer_top_n(n, pos)
         } else {

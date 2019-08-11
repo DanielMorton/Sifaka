@@ -40,7 +40,7 @@ where
     }
 }
 
-pub trait CsMatFloat<N, I>
+pub trait CsMatFloat<N, I>: CsMatBaseExt<N, I>
 where
     I: SpIndex,
 {

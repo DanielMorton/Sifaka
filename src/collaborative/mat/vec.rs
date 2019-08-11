@@ -19,8 +19,8 @@ pub trait CsVecBaseExt<N, I> {
     fn l1_norm(&self) -> N;
     fn center(&self) -> CsVecI<N, I>;
 
-    fn top_n(&self, n: usize, pos: bool) -> CsVecI<N, I>;
-    fn top_n_positive(&self, n: usize) -> CsVecI<N, I>;
+    fn top_n(&self, n: I, pos: bool) -> CsVecI<N, I>;
+    fn top_n_positive(&self, n: I) -> CsVecI<N, I>;
     fn threshold(&self, n: N) -> CsVecI<N, I>;
 }
 
@@ -76,10 +76,10 @@ where
         self.map(|x: &N| *x - avg)
     }
 
-    fn top_n(&self, n: usize, pos: bool) -> CsVecI<N, I> {
+    fn top_n(&self, n: I, pos: bool) -> CsVecI<N, I> {
         let mut pairs: Vec<(&I, &N)> = self.ind_iter().zip(self.data_iter()).collect();
         pairs.sort_by(|a, b| (b.1).partial_cmp(a.1).unwrap());
-        pairs = pairs[..n].to_vec();
+        pairs = pairs[..n.index()].to_vec();
 
         if pos {
             pairs = pairs.into_iter().filter(|p| p.1 > &N::zero()).collect();
@@ -93,7 +93,7 @@ where
         )
     }
 
-    fn top_n_positive(&self, n: usize) -> CsVecI<N, I> {
+    fn top_n_positive(&self, n: I) -> CsVecI<N, I> {
         self.top_n(n, true)
     }
 
