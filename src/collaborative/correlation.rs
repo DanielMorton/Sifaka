@@ -1,12 +1,10 @@
-use std::iter::Sum;
-
-use num_traits::{Float, Num, Signed};
+use num_traits::Float;
 use sprs::{CsMatI, SpIndex};
 
 use crate::collaborative::CsMatBaseExt;
 use crate::collaborative::mat::Value;
 
-use super::{Correlation, RecommenderType};
+use super::Correlation;
 use super::mat::CsMatFloat;
 
 fn correlation<N, I>(

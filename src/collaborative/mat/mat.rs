@@ -1,6 +1,5 @@
 use std::ops::Deref;
 
-use num_traits::Num;
 use sprs::{CsMatBase, CsMatI, CsVecBase, CsVecI, SpIndex};
 
 use super::{CsVecBaseExt, Value};

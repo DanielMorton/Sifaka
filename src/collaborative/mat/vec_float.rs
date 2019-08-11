@@ -1,6 +1,6 @@
 use std::ops::Deref;
 
-use num_traits::{Float, Num, Signed};
+use num_traits::Float;
 use sprs::{CsVecBase, CsVecI, SpIndex};
 
 use super::{CsVecBaseExt, Value};

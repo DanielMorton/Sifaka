@@ -1,7 +1,6 @@
 use std::ops::Deref;
 use std::slice::Iter;
 
-use num_traits::Num;
 use sprs::{CsVecBase, CsVecI, SpIndex};
 
 use super::Value;

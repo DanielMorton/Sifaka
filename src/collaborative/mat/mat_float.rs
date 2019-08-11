@@ -1,10 +1,9 @@
-use std::iter::Sum;
 use std::ops::Deref;
 
 use num_traits::Float;
 use sprs::{CsMatBase, CsMatI, CsVecBase, CsVecI, SpIndex};
 
-use super::{CsMatBaseExt, CsMatBaseHelp, CsVecBaseExt, CsVecFloat, Value};
+use super::{CsMatBaseExt, CsMatBaseHelp, CsVecFloat, Value};
 
 trait CSMatFloatHelp<N, I>: CsMatBaseExt<N, I>
 where
@@ -29,15 +28,7 @@ where
     }
 
     fn outer_normalize(&self) -> CsMatI<N, I> {
-        let mut data: Vec<N> = Vec::new();
-        for (_, vec) in self.outer_iterator().enumerate() {
-            data.append(&mut vec.normalize().data_vec());
-        }
-        if self.is_csc() {
-            CsMatI::new_csc(self.shape(), self.ip_vec(), self.ind_vec(), data)
-        } else {
-            CsMatI::new(self.shape(), self.ip_vec(), self.ind_vec(), data)
-        }
+       self.outer_transform(CsVecBase::normalize)
     }
 
     fn inner_l2_norm(&self) -> CsVecI<N, I> {
@@ -106,7 +97,8 @@ mod tests {
 
     use assert_approx_eq::assert_approx_eq;
 
-    use super::{CsMatBaseExt, CsMatFloat, CsVecBaseExt};
+    use super::{CsMatBaseExt, CsMatFloat};
+    use super::super::CsVecBaseExt;
 
     lazy_static! {
         static ref A_FLOAT: CsMatI<f64, usize> = CsMatI::new_csc(
