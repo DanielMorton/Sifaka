@@ -8,12 +8,13 @@ pub(super) trait CsMatBaseHelp<N, I>
 where
     I: SpIndex,
 {
-
     fn outer_agg<'a, F: Copy>(&'a self, func: F) -> CsVecI<N, I>
-        where F: Fn(&CsVecBase<&'a [I], &'a [N]>) -> N;
+    where
+        F: Fn(&CsVecBase<&'a [I], &'a [N]>) -> N;
 
     fn outer_transform<'a, F: Copy>(&'a self, func: F) -> CsMatI<N, I>
-        where F: Fn(&CsVecBase<&'a [I], &'a [N]>) -> CsVecI<N, I>;
+    where
+        F: Fn(&CsVecBase<&'a [I], &'a [N]>) -> CsVecI<N, I>;
 
     fn outer_sum(&self) -> CsVecI<N, I>;
     fn outer_avg(&self) -> CsVecI<N, I>;
@@ -38,7 +39,9 @@ where
     N: Value + Default,
 {
     fn outer_agg<'a, F: Copy>(&'a self, func: F) -> CsVecI<N, I>
-        where F: Fn(&CsVecBase<&'a [I], &'a [N]>) -> N {
+    where
+        F: Fn(&CsVecBase<&'a [I], &'a [N]>) -> N,
+    {
         let mut ind_vec: Vec<I> = Vec::new();
         let mut agg_vec: Vec<N> = Vec::new();
         for (ind, vec) in self.outer_iterator().enumerate() {
@@ -52,7 +55,9 @@ where
     }
 
     fn outer_transform<'a, F: Copy>(&'a self, func: F) -> CsMatI<N, I>
-        where F: Fn(&CsVecBase<&'a [I], &'a [N]>) -> CsVecI<N, I> {
+    where
+        F: Fn(&CsVecBase<&'a [I], &'a [N]>) -> CsVecI<N, I>,
+    {
         let mut data: Vec<N> = Vec::new();
         for (_, vec) in self.outer_iterator().enumerate() {
             data.append(&mut func(&vec).data_vec());

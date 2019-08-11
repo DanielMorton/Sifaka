@@ -28,7 +28,7 @@ where
     }
 
     fn outer_normalize(&self) -> CsMatI<N, I> {
-       self.outer_transform(CsVecBase::normalize)
+        self.outer_transform(CsVecBase::normalize)
     }
 
     fn inner_l2_norm(&self) -> CsVecI<N, I> {
