@@ -1,5 +1,4 @@
 use num_traits::Float;
-use num_traits::real::Real;
 use sprs::{CsMatI, SpIndex};
 
 use super::{Correlation, CsMatBaseExt, CsMatFloat, CsVecBaseExt, Predictor, Value};
@@ -30,7 +29,7 @@ where
         let user_user = user_item
             .corr(&correlation, true).threshold(threshold);
         let neighbors = *user_user.row_nnz().data().iter()
-            .max_by(|a, b| a.partial_cmp(b).unwrap()).unwrap();
+            .max_by_key(|x| *x).unwrap();
         UserUser { neighbors, user_user }
     }
 }
