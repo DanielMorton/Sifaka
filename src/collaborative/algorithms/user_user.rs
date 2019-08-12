@@ -1,7 +1,7 @@
 use num_traits::Float;
 use sprs::{CsMatI, SpIndex};
 
-use super::{Correlation, CsMatBaseExt, CsMatFloat, CsVecBaseExt, Predictor, Value};
+use super::{Correlation, CsMatBaseExt, CsMatFloat, Predictor, Value};
 
 struct UserUser<N, I>
 where

@@ -306,7 +306,7 @@ mod tests {
 
     use assert_approx_eq::assert_approx_eq;
 
-    use super::{CsMatBaseExt, CsMatBaseHelp};
+    use super::CsMatBaseExt;
 
     lazy_static! {
         static ref A_FLOAT: CsMatI<f64, usize> = CsMatI::new_csc(
