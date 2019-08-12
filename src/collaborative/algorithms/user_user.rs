@@ -1,15 +1,15 @@
 use num_traits::Float;
+use num_traits::real::Real;
 use sprs::{CsMatI, SpIndex};
 
-use super::{Correlation, CsMatBaseExt, CsMatFloat, Predictor, Value};
+use super::{Correlation, CsMatBaseExt, CsMatFloat, CsVecBaseExt, Predictor, Value};
 
 struct UserUser<N, I>
 where
     I: SpIndex,
 {
+    neighbors: usize,
     user_user: CsMatI<N, I>,
-    neighbors: I,
-    correlation: Correlation,
 }
 
 impl<N, I> Predictor<N, I> for UserUser<N, I>
@@ -17,18 +17,20 @@ where
     I: SpIndex,
     N: Value + Default + Float,
 {
-    fn new(user_item: &CsMatI<N, I>,
-           neighbors: I,
-           correlation: Correlation) -> Self {
-        let user_norm = match correlation {
-            Correlation::Cosine => user_item.row_normalize(),
-            Correlation::Pearson => user_item.row_center().row_normalize(),
-        };
-
+    fn new_k_neighbors(user_item: &CsMatI<N, I>, neighbors: I, correlation: Correlation) -> Self {
         UserUser {
-            user_user: (&user_norm * &user_norm.transpose_view()).row_top_n(neighbors,true),
-            neighbors,
-            correlation,
+            neighbors: SpIndex::index(neighbors),
+            user_user: user_item
+                .corr(&correlation, true)
+                .row_top_n(neighbors, true),
         }
+    }
+
+    fn new_threshold(user_item: &CsMatI<N, I>, threshold: N, correlation: Correlation) -> Self {
+        let user_user = user_item
+            .corr(&correlation, true).threshold(threshold);
+        let neighbors = *user_user.row_nnz().data().iter()
+            .max_by(|a, b| a.partial_cmp(b).unwrap()).unwrap();
+        UserUser { neighbors, user_user }
     }
 }

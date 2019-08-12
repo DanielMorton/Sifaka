@@ -4,6 +4,7 @@ use num_traits::Float;
 use sprs::{CsMatBase, CsMatI, CsVecBase, CsVecI, SpIndex};
 
 use super::{CsMatBaseExt, CsMatBaseHelp, CsVecFloat, Value};
+use super::Correlation;
 
 trait CSMatFloatHelp<N, I>: CsMatBaseExt<N, I>
 where
@@ -49,6 +50,8 @@ where
 
     fn col_normalize(&self) -> CsMatI<N, I>;
     fn row_normalize(&self) -> CsMatI<N, I>;
+
+    fn corr(&self, correlation: &Correlation, row: bool) -> CsMatI<N, I>;
 }
 
 impl<N, I, IS, DS> CsMatFloat<N, I> for CsMatBase<N, I, IS, IS, DS>
@@ -87,6 +90,22 @@ where
             self.outer_normalize()
         } else {
             self.inner_normalize()
+        }
+    }
+
+    fn corr(&self, correlation: &Correlation, row: bool) -> CsMatI<N, I> {
+        if row {
+            let row_norm = match correlation {
+                Correlation::Cosine => self.row_normalize(),
+                Correlation::Pearson => self.row_center().row_normalize(),
+            };
+            &row_norm * &row_norm.transpose_view()
+        } else {
+            let col_norm = match correlation {
+                Correlation::Cosine => self.col_normalize(),
+                Correlation::Pearson => self.row_center().col_normalize(),
+            };
+            &col_norm.transpose_view() * &col_norm
         }
     }
 }

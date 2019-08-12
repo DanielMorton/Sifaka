@@ -14,6 +14,7 @@ pub trait CsVecBaseExt<N, I> {
     fn data_fold<T>(&self, init: N, f: T) -> N
     where
         T: Fn(N, &N) -> N;
+
     fn sum(&self) -> N;
     fn avg(&self) -> N;
     fn l1_norm(&self) -> N;

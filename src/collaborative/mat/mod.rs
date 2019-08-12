@@ -8,6 +8,8 @@ pub use mat_float::CsMatFloat;
 pub use vec::CsVecBaseExt;
 pub use vec_float::CsVecFloat;
 
+pub use super::Correlation;
+
 mod mat;
 mod mat_float;
 mod vec;

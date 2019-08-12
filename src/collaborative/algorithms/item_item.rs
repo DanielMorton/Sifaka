@@ -4,8 +4,8 @@ use sprs::{CsMatI, SpIndex};
 use super::{Correlation, CsMatBaseExt, CsMatFloat, Predictor, Value};
 
 struct ItemItem<N, I>
-    where
-        I: SpIndex,
+where
+    I: SpIndex,
 {
     item_item: CsMatI<N, I>,
     neighbors: I,
