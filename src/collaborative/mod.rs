@@ -1,14 +1,12 @@
-pub use cor_type::Correlation as Correlation;
-pub use correlation::correlation as correlation;
-pub use mat::CsMatBaseExt as CsMatBaseExt;
-pub use mat::CsMatFloat as CsMatFloat;
-pub use mat::CsVecBaseExt as CsVecBaseExt;
-pub use mat::CsVecFloat as CsVecFloat;
-pub use recommender_type::RecommenderType as RecommenderType;
+pub use cor_type::Correlation;
+pub use correlation::{item_correlation, user_correlation};
+pub use mat::{CsMatBaseExt, CsMatFloat, CsVecBaseExt, CsVecFloat};
+pub use recommender_type::RecommenderType;
 
-pub mod mat;
-pub mod correlation;
+pub use crate::collaborative::mat::Value;
+
 pub mod cor_type;
+pub mod correlation;
+pub mod mat;
 pub mod ranking;
 pub mod recommender_type;
-

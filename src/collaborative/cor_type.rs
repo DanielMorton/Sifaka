@@ -1,4 +1,4 @@
 pub enum Correlation {
     Pearson,
-    Cosine
+    Cosine,
 }
