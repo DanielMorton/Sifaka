@@ -138,7 +138,6 @@ mod tests {
 
     #[test]
     fn test_float_avg() {
-        let v = CsVecI::new(5, vec![0, 2, 4], vec![3.14f64, 2.7, 1.6]);
         assert_approx_eq!(V_FLOAT.avg(), 2.48);
         let n: CsVecI<f64, usize> = CsVecI::new(6, Vec::new(), Vec::new());
         assert_eq!(n.avg(), 0.0)
@@ -146,7 +145,6 @@ mod tests {
 
     #[test]
     fn test_int_avg() {
-        let v = CsVecI::new(5, vec![0, 2, 4], vec![3, 2, 1]);
         assert_eq!(V_INT.avg(), 2);
         let n: CsVecI<i32, usize> = CsVecI::new(6, Vec::new(), Vec::new());
         assert_eq!(n.avg(), 0)
