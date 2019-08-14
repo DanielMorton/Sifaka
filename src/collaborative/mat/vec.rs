@@ -25,11 +25,11 @@ pub trait CsVecBaseExt<N, I> {
     fn threshold(&self, n: N) -> CsVecI<N, I>;
 }
 
-impl<N, I, IS, DS> CsVecBaseExt<N, I> for CsVecBase<IS, DS>
+impl<'a, N, I, IS, DS> CsVecBaseExt<N, I> for CsVecBase<IS, DS>
 where
     I: SpIndex,
-    IS: Deref<Target = [I]>,
-    DS: Deref<Target = [N]>,
+    IS: Deref<Target = [I]> + 'a,
+    DS: Deref<Target = [N]> + 'a,
     N: Value,
 {
     fn ind_iter(&self) -> Iter<I> {

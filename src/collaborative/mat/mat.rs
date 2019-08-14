@@ -1,7 +1,7 @@
 use std::ops::Deref;
 
 use num_traits::Num;
-use sprs::{CsMatBase, CsMatI, CsVecBase, CsVecI, SpIndex};
+use sprs::{CsMatBase, CsMatI, CsVecBase, CsVecI, CsVecViewI, SpIndex};
 
 use super::{CsVecBaseExt, Value};
 
@@ -9,28 +9,28 @@ pub(super) trait CsMatBaseHelp<N, I>
 where
     I: SpIndex,
 {
-    fn outer_agg<'a, F: Copy, M>(&'a self, func: F) -> CsVecI<M, I>
+    fn outer_agg<F: Copy, M>(&self, func: F) -> CsVecI<M, I>
     where
-        F: Fn(&CsVecBase<&'a [I], &'a [N]>) -> M,
+        F: Fn(&CsVecI<N, I>) -> M,
         M: Num + Copy + Default;
 
-    fn outer_transform<'a, F: Copy, M>(&'a self, func: F) -> CsMatI<M, I>
-    where
-        F: Fn(&CsVecBase<&'a [I], &'a [N]>) -> CsVecI<M, I>,
+    fn outer_transform<F: Copy, M>(&self, func: F) -> CsMatI<M, I>
+        where
+            F: Fn(&CsVecI<N, I>) -> CsVecI<M, I>,
         M: Value + Default;
-
-    fn outer_sum(&self) -> CsVecI<N, I>;
-    fn outer_avg(&self) -> CsVecI<N, I>;
-    fn outer_l1_norm(&self) -> CsVecI<N, I>;
-    fn outer_nnz(&self) -> CsVecI<usize, I>;
 
     fn outer_center(&self) -> CsMatI<N, I>;
     fn outer_top_n(&self, n: I, pos: bool) -> CsMatI<N, I>;
 
-    fn inner_sum(&self) -> CsVecI<N, I>;
-    fn inner_avg(&self) -> CsVecI<N, I>;
-    fn inner_l1_norm(&self) -> CsVecI<N, I>;
-    fn inner_nnz(&self) -> CsVecI<usize, I>;
+    fn inner_agg< F: Copy, M>(& self, func: F) -> CsVecI<M, I>
+        where
+            F: Fn(&CsVecI<N, I>) -> M,
+            M: Num + Copy + Default;
+
+    fn inner_transform<F: Copy, M>(&self, func: F) -> CsMatI<M, I>
+        where
+            F: Fn(&CsVecI<N, I>) -> CsVecI<M, I>,
+            M: Value + Default;
 
     fn inner_center(&self) -> CsMatI<N, I>;
     fn inner_top_n(&self, n: I, pos: bool) -> CsMatI<N, I>;
@@ -43,15 +43,15 @@ where
     DS: Deref<Target = [N]>,
     N: Value + Default,
 {
-    fn outer_agg<'a, F: Copy, M>(&'a self, func: F) -> CsVecI<M, I>
+    fn outer_agg<F: Copy, M>(&self, func: F) -> CsVecI<M, I>
     where
-        F: Fn(&CsVecBase<&'a [I], &'a [N]>) -> M,
+        F: Fn(&CsVecI<N, I>) -> M,
         M: Num + Copy + Default
     {
         let mut ind_vec: Vec<I> = Vec::new();
         let mut agg_vec: Vec<M> = Vec::new();
         for (ind, vec) in self.outer_iterator().enumerate() {
-            let v = func(&vec);
+            let v = func(&vec.to_owned());
             if v != M::zero() {
                 ind_vec.push(SpIndex::from_usize(ind));
                 agg_vec.push(v);
@@ -60,14 +60,14 @@ where
         CsVecI::new(self.outer_dims(), ind_vec, agg_vec)
     }
 
-    fn outer_transform<'a, F: Copy, M>(&'a self, func: F) -> CsMatI<M, I>
+    fn outer_transform<F: Copy, M>(&self, func: F) -> CsMatI<M, I>
     where
-        F: Fn(&CsVecBase<&'a [I], &'a [N]>) -> CsVecI<M, I>,
+        F: Fn(&CsVecI<N, I>) -> CsVecI<M, I>,
         M: Value + Default,
     {
         let mut data: Vec<M> = Vec::new();
         for (_, vec) in self.outer_iterator().enumerate() {
-            data.append(&mut func(&vec).data_vec());
+            data.append(&mut func(&vec.to_owned()).data_vec());
         }
         if self.is_csc() {
             CsMatI::new_csc(self.shape(), self.ip_vec(), self.ind_vec(), data)
@@ -76,19 +76,19 @@ where
         }
     }
 
-    fn outer_sum(&self) -> CsVecI<N, I> {
-        self.outer_agg(CsVecBase::sum)
+    fn inner_agg<F: Copy, M>(&self, func: F) -> CsVecI<M, I>
+        where
+            F: Fn(&CsVecI<N, I>) -> M,
+            M: Num + Copy + Default {
+        self.to_other_storage().outer_agg(func)
     }
 
-    fn outer_avg(&self) -> CsVecI<N, I> {
-        self.outer_agg(CsVecBase::avg)
+    fn inner_transform<F: Copy, M>(&self, func: F) -> CsMatI<M, I>
+        where
+            F: Fn(&CsVecI<N, I>) -> CsVecI<M, I>,
+            M: Value + Default {
+        self.to_other_storage().outer_transform(func).to_other_storage()
     }
-
-    fn outer_l1_norm(&self) -> CsVecI<N, I> {
-        self.outer_agg(CsVecBase::l1_norm)
-    }
-
-    fn outer_nnz(&self) -> CsVecI<usize, I> {self.outer_agg(CsVecBase::nnz)}
 
     fn outer_center(&self) -> CsMatI<N, I> {
         self.outer_transform(CsVecBase::center)
@@ -111,22 +111,6 @@ where
         }
     }
 
-    fn inner_sum(&self) -> CsVecI<N, I> {
-        self.to_other_storage().outer_sum()
-    }
-
-    fn inner_avg(&self) -> CsVecI<N, I> {
-        self.to_other_storage().outer_avg()
-    }
-
-    fn inner_l1_norm(&self) -> CsVecI<N, I> {
-        self.to_other_storage().outer_l1_norm()
-    }
-
-    fn inner_nnz(&self) -> CsVecI<usize, I> {
-        self.to_other_storage().outer_nnz()
-    }
-
     fn inner_center(&self) -> CsMatI<N, I> {
         self.to_other_storage().outer_center().to_other_storage()
     }
@@ -145,6 +129,26 @@ where
     fn ip_vec(&self) -> Vec<I>;
     fn ind_vec(&self) -> Vec<I>;
     fn data_vec(&self) -> Vec<N>;
+
+    fn col_agg< F: Copy, M>(& self, func: F) -> CsVecI<M, I>
+        where
+            F: Fn(&CsVecI<N, I>) -> M,
+            M: Num + Copy + Default;
+
+    fn row_agg< F: Copy, M>(& self, func: F) -> CsVecI<M, I>
+        where
+            F: Fn(&CsVecI<N, I>) -> M,
+            M: Num + Copy + Default;
+
+    fn col_transform<F: Copy, M>(&self, func: F) -> CsMatI<M, I>
+        where
+            F: Fn(&CsVecI<N, I>) -> CsVecI<M, I>,
+            M: Value + Default;
+
+    fn row_transform<F: Copy, M>(&self, func: F) -> CsMatI<M, I>
+        where
+            F: Fn(&CsVecI<N, I>) -> CsVecI<M, I>,
+            M: Value + Default;
 
     fn col_sum(&self) -> CsVecI<N, I>;
     fn row_sum(&self) -> CsVecI<N, I>;
@@ -186,84 +190,88 @@ where
         self.data().to_vec()
     }
 
-    fn col_sum(&self) -> CsVecI<N, I> {
+    fn col_agg< F: Copy, M>(&self, func: F) -> CsVecI<M, I>
+        where
+            F: Fn(&CsVecI<N, I>) -> M,
+            M: Num + Copy + Default {
         if self.is_csc() {
-            self.outer_sum()
+            self.outer_agg(func)
         } else {
-            self.inner_sum()
+            self.inner_agg(func)
         }
+    }
+
+    fn row_agg< F: Copy, M>(&self, func: F) -> CsVecI<M, I>
+        where
+            F: Fn(&CsVecI<N, I>) -> M,
+            M: Num + Copy + Default {
+        if self.is_csr() {
+            self.outer_agg(func)
+        } else {
+            self.inner_agg(func)
+        }
+    }
+
+    fn col_transform<F: Copy, M>(&self, func: F) -> CsMatI<M, I>
+        where
+            F: Fn(&CsVecI<N, I>) -> CsVecI<M, I>,
+            M: Value + Default {
+        if self.is_csc() {
+            self.outer_transform(func)
+        } else {
+            self.inner_transform(func)
+        }
+    }
+
+    fn row_transform<F: Copy, M>(&self, func: F) -> CsMatI<M, I>
+        where
+            F: Fn(&CsVecI<N, I>) -> CsVecI<M, I>,
+            M: Value + Default {
+        if self.is_csr() {
+            self.outer_transform(func)
+        } else {
+            self.inner_transform(func)
+        }
+    }
+
+    fn col_sum(&self) -> CsVecI<N, I> {
+        self.col_agg(CsVecBase::sum)
     }
 
     fn row_sum(&self) -> CsVecI<N, I> {
-        if self.is_csr() {
-            self.outer_sum()
-        } else {
-            self.inner_sum()
-        }
+        self.row_agg(CsVecBase::sum)
     }
 
     fn col_avg(&self) -> CsVecI<N, I> {
-        if self.is_csc() {
-            self.outer_avg()
-        } else {
-            self.inner_avg()
-        }
+        self.col_agg(CsVecBase::avg)
     }
 
     fn row_avg(&self) -> CsVecI<N, I> {
-        if self.is_csr() {
-            self.outer_avg()
-        } else {
-            self.inner_avg()
-        }
+        self.row_agg(CsVecBase::avg)
     }
 
     fn col_l1_norm(&self) -> CsVecI<N, I> {
-        if self.is_csc() {
-            self.outer_l1_norm()
-        } else {
-            self.inner_l1_norm()
-        }
+        self.col_agg(CsVecBase::l1_norm)
     }
 
     fn row_l1_norm(&self) -> CsVecI<N, I> {
-        if self.is_csr() {
-            self.outer_l1_norm()
-        } else {
-            self.inner_l1_norm()
-        }
+        self.row_agg(CsVecBase::l1_norm)
     }
 
     fn col_nnz(&self) -> CsVecI<usize, I> {
-        if self.is_csc() {
-            self.outer_nnz()
-        } else {
-            self.inner_nnz()
-        }
+        self.col_agg(CsVecBase::nnz)
     }
 
     fn row_nnz(&self) -> CsVecI<usize, I> {
-        if self.is_csr() {
-            self.outer_nnz()
-        } else {
-            self.inner_nnz()
-        }
+        self.row_agg(CsVecBase::nnz)
     }
 
     fn col_center(&self) -> CsMatI<N, I> {
-        if self.is_csc() {
-            self.outer_center()
-        } else {
-            self.inner_center()
-        }
+        self.col_transform(CsVecBase::center)
     }
 
     fn row_center(&self) -> CsMatI<N, I> {
-        if self.is_csr() {
-            self.outer_center()
-        } else {
-            self.inner_center()
-        }
+        self.row_transform(CsVecBase::center)
     }
 
     fn col_top_n(&self, n: I, pos: bool) -> CsMatI<N, I> {

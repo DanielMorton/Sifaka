@@ -62,35 +62,19 @@ where
     N: Value + Default + Float,
 {
     fn col_l2_norm(&self) -> CsVecI<N, I> {
-        if self.is_csc() {
-            self.outer_l2_norm()
-        } else {
-            self.inner_l2_norm()
-        }
+        self.col_agg(CsVecBase::l2_norm)
     }
 
     fn row_l2_norm(&self) -> CsVecI<N, I> {
-        if self.is_csr() {
-            self.outer_l2_norm()
-        } else {
-            self.inner_l2_norm()
-        }
+        self.row_agg(CsVecBase::l2_norm)
     }
 
     fn col_normalize(&self) -> CsMatI<N, I> {
-        if self.is_csc() {
-            self.outer_normalize()
-        } else {
-            self.inner_normalize()
-        }
+        self.col_transform(CsVecBase::normalize)
     }
 
     fn row_normalize(&self) -> CsMatI<N, I> {
-        if self.is_csr() {
-            self.outer_normalize()
-        } else {
-            self.inner_normalize()
-        }
+        self.row_transform(CsVecBase::normalize)
     }
 
     fn corr(&self, correlation: &Correlation, row: bool) -> CsMatI<N, I> {
