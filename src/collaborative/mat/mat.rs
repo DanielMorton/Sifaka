@@ -19,7 +19,6 @@ where
             F: Fn(&CsVecI<N, I>) -> CsVecI<M, I>,
         M: Value + Default;
 
-    fn outer_center(&self) -> CsMatI<N, I>;
     fn outer_top_n(&self, n: I, pos: bool) -> CsMatI<N, I>;
 
     fn inner_agg< F: Copy, M>(& self, func: F) -> CsVecI<M, I>
@@ -32,7 +31,6 @@ where
             F: Fn(&CsVecI<N, I>) -> CsVecI<M, I>,
             M: Value + Default;
 
-    fn inner_center(&self) -> CsMatI<N, I>;
     fn inner_top_n(&self, n: I, pos: bool) -> CsMatI<N, I>;
 }
 
@@ -76,24 +74,6 @@ where
         }
     }
 
-    fn inner_agg<F: Copy, M>(&self, func: F) -> CsVecI<M, I>
-        where
-            F: Fn(&CsVecI<N, I>) -> M,
-            M: Num + Copy + Default {
-        self.to_other_storage().outer_agg(func)
-    }
-
-    fn inner_transform<F: Copy, M>(&self, func: F) -> CsMatI<M, I>
-        where
-            F: Fn(&CsVecI<N, I>) -> CsVecI<M, I>,
-            M: Value + Default {
-        self.to_other_storage().outer_transform(func).to_other_storage()
-    }
-
-    fn outer_center(&self) -> CsMatI<N, I> {
-        self.outer_transform(CsVecBase::center)
-    }
-
     fn outer_top_n(&self, n: I, pos: bool) -> CsMatI<N, I> {
         let mut ip_vec: Vec<I> = Vec::new();
         let mut ind_vec: Vec<I> = Vec::new();
@@ -111,8 +91,18 @@ where
         }
     }
 
-    fn inner_center(&self) -> CsMatI<N, I> {
-        self.to_other_storage().outer_center().to_other_storage()
+    fn inner_agg<F: Copy, M>(&self, func: F) -> CsVecI<M, I>
+        where
+            F: Fn(&CsVecI<N, I>) -> M,
+            M: Num + Copy + Default {
+        self.to_other_storage().outer_agg(func)
+    }
+
+    fn inner_transform<F: Copy, M>(&self, func: F) -> CsMatI<M, I>
+        where
+            F: Fn(&CsVecI<N, I>) -> CsVecI<M, I>,
+            M: Value + Default {
+        self.to_other_storage().outer_transform(func).to_other_storage()
     }
 
     fn inner_top_n(&self, n: I, pos: bool) -> CsMatI<N, I> {
