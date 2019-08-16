@@ -26,10 +26,16 @@ where
     }
 
     fn new_threshold(user_item: &CsMatI<N, I>, threshold: N, correlation: Correlation) -> Self {
-        let user_user = user_item
-            .corr(&correlation, true).threshold(threshold);
-        let neighbors = *user_user.row_nnz().data().iter()
-            .max_by_key(|x| *x).unwrap();
-        UserUser { neighbors, user_user }
+        let user_user = user_item.corr(&correlation, true).threshold(threshold);
+        let neighbors = *user_user
+            .row_nnz()
+            .data()
+            .iter()
+            .max_by_key(|x| *x)
+            .unwrap();
+        UserUser {
+            neighbors,
+            user_user,
+        }
     }
 }

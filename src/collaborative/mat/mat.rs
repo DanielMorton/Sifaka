@@ -15,21 +15,21 @@ where
         M: Num + Copy + Default;
 
     fn outer_transform<F: Copy, M>(&self, func: F) -> CsMatI<M, I>
-        where
-            F: Fn(&CsVecI<N, I>) -> CsVecI<M, I>,
+    where
+        F: Fn(&CsVecI<N, I>) -> CsVecI<M, I>,
         M: Value + Default;
 
     fn outer_top_n(&self, n: I, pos: bool) -> CsMatI<N, I>;
 
-    fn inner_agg< F: Copy, M>(& self, func: F) -> CsVecI<M, I>
-        where
-            F: Fn(&CsVecI<N, I>) -> M,
-            M: Num + Copy + Default;
+    fn inner_agg<F: Copy, M>(&self, func: F) -> CsVecI<M, I>
+    where
+        F: Fn(&CsVecI<N, I>) -> M,
+        M: Num + Copy + Default;
 
     fn inner_transform<F: Copy, M>(&self, func: F) -> CsMatI<M, I>
-        where
-            F: Fn(&CsVecI<N, I>) -> CsVecI<M, I>,
-            M: Value + Default;
+    where
+        F: Fn(&CsVecI<N, I>) -> CsVecI<M, I>,
+        M: Value + Default;
 
     fn inner_top_n(&self, n: I, pos: bool) -> CsMatI<N, I>;
 }
@@ -44,7 +44,7 @@ where
     fn outer_agg<F: Copy, M>(&self, func: F) -> CsVecI<M, I>
     where
         F: Fn(&CsVecI<N, I>) -> M,
-        M: Num + Copy + Default
+        M: Num + Copy + Default,
     {
         let mut ind_vec: Vec<I> = Vec::new();
         let mut agg_vec: Vec<M> = Vec::new();
@@ -92,17 +92,21 @@ where
     }
 
     fn inner_agg<F: Copy, M>(&self, func: F) -> CsVecI<M, I>
-        where
-            F: Fn(&CsVecI<N, I>) -> M,
-            M: Num + Copy + Default {
+    where
+        F: Fn(&CsVecI<N, I>) -> M,
+        M: Num + Copy + Default,
+    {
         self.to_other_storage().outer_agg(func)
     }
 
     fn inner_transform<F: Copy, M>(&self, func: F) -> CsMatI<M, I>
-        where
-            F: Fn(&CsVecI<N, I>) -> CsVecI<M, I>,
-            M: Value + Default {
-        self.to_other_storage().outer_transform(func).to_other_storage()
+    where
+        F: Fn(&CsVecI<N, I>) -> CsVecI<M, I>,
+        M: Value + Default,
+    {
+        self.to_other_storage()
+            .outer_transform(func)
+            .to_other_storage()
     }
 
     fn inner_top_n(&self, n: I, pos: bool) -> CsMatI<N, I> {
@@ -120,25 +124,25 @@ where
     fn ind_vec(&self) -> Vec<I>;
     fn data_vec(&self) -> Vec<N>;
 
-    fn col_agg< F: Copy, M>(& self, func: F) -> CsVecI<M, I>
-        where
-            F: Fn(&CsVecI<N, I>) -> M,
-            M: Num + Copy + Default;
+    fn col_agg<F: Copy, M>(&self, func: F) -> CsVecI<M, I>
+    where
+        F: Fn(&CsVecI<N, I>) -> M,
+        M: Num + Copy + Default;
 
-    fn row_agg< F: Copy, M>(& self, func: F) -> CsVecI<M, I>
-        where
-            F: Fn(&CsVecI<N, I>) -> M,
-            M: Num + Copy + Default;
+    fn row_agg<F: Copy, M>(&self, func: F) -> CsVecI<M, I>
+    where
+        F: Fn(&CsVecI<N, I>) -> M,
+        M: Num + Copy + Default;
 
     fn col_transform<F: Copy, M>(&self, func: F) -> CsMatI<M, I>
-        where
-            F: Fn(&CsVecI<N, I>) -> CsVecI<M, I>,
-            M: Value + Default;
+    where
+        F: Fn(&CsVecI<N, I>) -> CsVecI<M, I>,
+        M: Value + Default;
 
     fn row_transform<F: Copy, M>(&self, func: F) -> CsMatI<M, I>
-        where
-            F: Fn(&CsVecI<N, I>) -> CsVecI<M, I>,
-            M: Value + Default;
+    where
+        F: Fn(&CsVecI<N, I>) -> CsVecI<M, I>,
+        M: Value + Default;
 
     fn col_sum(&self) -> CsVecI<N, I>;
     fn row_sum(&self) -> CsVecI<N, I>;
@@ -180,10 +184,11 @@ where
         self.data().to_vec()
     }
 
-    fn col_agg< F: Copy, M>(&self, func: F) -> CsVecI<M, I>
-        where
-            F: Fn(&CsVecI<N, I>) -> M,
-            M: Num + Copy + Default {
+    fn col_agg<F: Copy, M>(&self, func: F) -> CsVecI<M, I>
+    where
+        F: Fn(&CsVecI<N, I>) -> M,
+        M: Num + Copy + Default,
+    {
         if self.is_csc() {
             self.outer_agg(func)
         } else {
@@ -191,10 +196,11 @@ where
         }
     }
 
-    fn row_agg< F: Copy, M>(&self, func: F) -> CsVecI<M, I>
-        where
-            F: Fn(&CsVecI<N, I>) -> M,
-            M: Num + Copy + Default {
+    fn row_agg<F: Copy, M>(&self, func: F) -> CsVecI<M, I>
+    where
+        F: Fn(&CsVecI<N, I>) -> M,
+        M: Num + Copy + Default,
+    {
         if self.is_csr() {
             self.outer_agg(func)
         } else {
@@ -203,9 +209,10 @@ where
     }
 
     fn col_transform<F: Copy, M>(&self, func: F) -> CsMatI<M, I>
-        where
-            F: Fn(&CsVecI<N, I>) -> CsVecI<M, I>,
-            M: Value + Default {
+    where
+        F: Fn(&CsVecI<N, I>) -> CsVecI<M, I>,
+        M: Value + Default,
+    {
         if self.is_csc() {
             self.outer_transform(func)
         } else {
@@ -214,9 +221,10 @@ where
     }
 
     fn row_transform<F: Copy, M>(&self, func: F) -> CsMatI<M, I>
-        where
-            F: Fn(&CsVecI<N, I>) -> CsVecI<M, I>,
-            M: Value + Default {
+    where
+        F: Fn(&CsVecI<N, I>) -> CsVecI<M, I>,
+        M: Value + Default,
+    {
         if self.is_csr() {
             self.outer_transform(func)
         } else {

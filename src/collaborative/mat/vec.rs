@@ -173,7 +173,8 @@ mod tests {
     #[test]
     fn test_float_center() {
         let v_cent = CsVecI::new(5, vec![0, 2, 4], vec![0.66, 0.22, -0.88]);
-        (&V_FLOAT.center() - &v_cent).data_vec()
+        (&V_FLOAT.center() - &v_cent)
+            .data_vec()
             .iter()
             .for_each(|x| assert_approx_eq!(x, 0.0));
     }
