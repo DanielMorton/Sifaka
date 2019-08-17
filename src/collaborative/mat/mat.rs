@@ -315,20 +315,14 @@ mod tests {
     use super::CsMatBaseExt;
 
     lazy_static! {
-        static ref A_FLOAT: CsMatI<f64, usize> = CsMatI::new_csc(
-            (5, 4),
-            vec![0, 2, 2, 4, 5],
-            vec![0, 1, 0, 3, 3],
-            vec![3.14, 2.7, 1.62, 0.58, 4.67]
-        );
         static ref A_INT: CsMatI<i32, usize> = CsMatI::new_csc(
             (5, 4),
             vec![0, 2, 2, 4, 5],
             vec![0, 1, 0, 3, 3],
             vec![1, 2, 3, 4, 5]
         );
-        static ref B_FLOAT: CsMatI<f64, usize> = CsMatI::new(
-            (4, 5),
+        static ref A_FLOAT: CsMatI<f64, usize> = CsMatI::new_csc(
+            (5, 4),
             vec![0, 2, 2, 4, 5],
             vec![0, 1, 0, 3, 3],
             vec![3.14, 2.7, 1.62, 0.58, 4.67]
@@ -339,6 +333,12 @@ mod tests {
             vec![0, 1, 0, 3, 3],
             vec![1, 2, 3, 4, 5]
         );
+        static ref B_FLOAT: CsMatI<f64, usize> = CsMatI::new(
+            (4, 5),
+            vec![0, 2, 2, 4, 5],
+            vec![0, 1, 0, 3, 3],
+            vec![3.14, 2.7, 1.62, 0.58, 4.67]
+        );
     }
 
     #[test]
@@ -348,7 +348,11 @@ mod tests {
         assert_eq!(A_INT.col_sum(), outer);
         assert_eq!(A_INT.row_sum(), inner);
         assert_eq!(B_INT.col_sum(), inner);
-        assert_eq!(B_INT.row_sum(), outer)
+        assert_eq!(B_INT.row_sum(), outer);
+        assert_eq!(A_INT.map(|x| -1 * x).col_sum(), outer.map(|x| -1 * x));
+        assert_eq!(A_INT.map(|x| -1 * x).row_sum(), inner.map(|x| -1 * x));
+        assert_eq!(B_INT.map(|x| -1 * x).col_sum(), inner.map(|x| -1 * x));
+        assert_eq!(B_INT.map(|x| -1 * x).row_sum(), outer.map(|x| -1 * x))
     }
 
     #[test]
@@ -358,7 +362,11 @@ mod tests {
         assert_eq!(A_FLOAT.col_sum(), outer);
         assert_eq!(A_FLOAT.row_sum(), inner);
         assert_eq!(B_FLOAT.col_sum(), inner);
-        assert_eq!(B_FLOAT.row_sum(), outer)
+        assert_eq!(B_FLOAT.row_sum(), outer);
+        assert_eq!(A_FLOAT.map(|x| -1.0 * x).col_sum(), outer.map(|x| -1.0 * x));
+        assert_eq!(A_FLOAT.map(|x| -1.0 * x).row_sum(), inner.map(|x| -1.0 * x));
+        assert_eq!(B_FLOAT.map(|x| -1.0 * x).col_sum(), inner.map(|x| -1.0 * x));
+        assert_eq!(B_FLOAT.map(|x| -1.0 * x).row_sum(), outer.map(|x| -1.0 * x))
     }
 
     #[test]
@@ -379,6 +387,48 @@ mod tests {
         assert_eq!(A_FLOAT.row_avg(), inner);
         assert_eq!(B_FLOAT.col_avg(), inner);
         assert_eq!(B_FLOAT.row_avg(), outer)
+    }
+
+    #[test]
+    fn test_int_l1_norm() {
+        let outer = CsVecI::new(4, vec![0, 2, 3], vec![3, 7, 5]);
+        let inner = CsVecI::new(5, vec![0, 1, 3], vec![4, 2, 9]);
+        assert_eq!(A_INT.col_l1_norm(), outer);
+        assert_eq!(A_INT.row_l1_norm(), inner);
+        assert_eq!(B_INT.col_l1_norm(), inner);
+        assert_eq!(B_INT.row_l1_norm(), outer);
+        assert_eq!(A_INT.map(|x| -1 * x).col_l1_norm(), outer);
+        assert_eq!(A_INT.map(|x| -1 * x).row_l1_norm(), inner);
+        assert_eq!(B_INT.map(|x| -1 * x).col_l1_norm(), inner);
+        assert_eq!(B_INT.map(|x| -1 * x).row_l1_norm(), outer)
+    }
+
+    #[test]
+    fn test_float_l1_norm() {
+        let outer = CsVecI::new(4, vec![0, 2, 3], vec![5.84, 2.2, 4.67]);
+        let inner = CsVecI::new(5, vec![0, 1, 3], vec![4.76, 2.7, 5.25]);
+        assert_eq!(A_FLOAT.col_l1_norm(), outer);
+        assert_eq!(A_FLOAT.row_l1_norm(), inner);
+        assert_eq!(B_FLOAT.col_l1_norm(), inner);
+        assert_eq!(B_FLOAT.row_l1_norm(), outer);
+        assert_eq!(A_FLOAT.map(|x| -1.0 * x).col_l1_norm(), outer);
+        assert_eq!(A_FLOAT.map(|x| -1.0 * x).row_l1_norm(), inner);
+        assert_eq!(B_FLOAT.map(|x| -1.0 * x).col_l1_norm(), inner);
+        assert_eq!(B_FLOAT.map(|x| -1.0 * x).row_l1_norm(), outer)
+    }
+
+    #[test]
+    fn test_nnz() {
+        let outer = CsVecI::new(4, vec![0, 2, 3], vec![2, 2, 1]);
+        let inner = CsVecI::new(5, vec![0, 1, 3], vec![2, 1, 2]);
+        assert_eq!(A_INT.col_nnz(), outer);
+        assert_eq!(A_INT.row_nnz(), inner);
+        assert_eq!(B_INT.col_nnz(), inner);
+        assert_eq!(B_INT.row_nnz(), outer);
+        assert_eq!(A_FLOAT.col_nnz(), outer);
+        assert_eq!(A_FLOAT.row_nnz(), inner);
+        assert_eq!(B_FLOAT.col_nnz(), inner);
+        assert_eq!(B_FLOAT.row_nnz(), outer);
     }
 
     #[test]

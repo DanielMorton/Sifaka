@@ -18,7 +18,7 @@ where
     N: Value + Float,
 {
     fn l2_norm(&self) -> N {
-        self.data_fold(N::zero(), |s, &x| s + x * x).sqrt()
+        self.norm(N::one() + N::one())
     }
 
     fn normalize(&self) -> CsVecI<N, I> {

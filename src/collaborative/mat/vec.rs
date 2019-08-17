@@ -17,7 +17,6 @@ pub trait CsVecBaseExt<N, I> {
 
     fn sum(&self) -> N;
     fn avg(&self) -> N;
-    fn l1_norm(&self) -> N;
     fn center(&self) -> CsVecI<N, I>;
 
     fn top_n(&self, n: I, pos: bool) -> CsVecI<N, I>;
@@ -66,10 +65,6 @@ where
         } else {
             N::zero()
         }
-    }
-
-    fn l1_norm(&self) -> N {
-        self.data_fold(N::zero(), |s, &x| s + x.abs())
     }
 
     fn center(&self) -> CsVecI<N, I> {
@@ -127,12 +122,8 @@ mod tests {
         static ref V_INT: CsVecI<i32, usize> = CsVecI::new(5, vec![0, 2, 4], vec![3, 2, 1]);
         static ref V_INT_T: CsVecI<i32, usize> =
             CsVecI::new(8, vec![0, 2, 3, 5, 7], vec![1, 5, 2, 4, 3]);
-        static ref V_INT_NEG: CsVecI<i32, usize> =
-            CsVecI::new(8, vec![0, 2, 3, 5, 7], vec![-1, -5, -2, -4, -3]);
         static ref V_FLOAT_T: CsVecI<f64, usize> =
             CsVecI::new(8, vec![0, 2, 3, 5, 7], vec![1.60, 5.4, 2.718, 4.67, 3.14]);
-        static ref V_FLOAT_NEG: CsVecI<f64, usize> =
-            CsVecI::new(8, vec![0, 2, 3, 5, 7], vec![-1.60, -5.4, -2.718, -4.67, -3.14]);
     }
     #[test]
     fn test_float_sum() {
@@ -159,20 +150,6 @@ mod tests {
     }
 
     #[test]
-    fn test_int_norm() {
-        let v = CsVecI::new(5, vec![0, 2, 4], vec![-3, -2, -1]);
-        assert_eq!(V_INT.l1_norm(), 6);
-        assert_eq!(v.l1_norm(), 6);
-    }
-
-    #[test]
-    fn test_float_norm() {
-        let v = CsVecI::new(5, vec![0, 2, 4], vec![-3.14f64, -2.7, -1.6]);
-        assert_approx_eq!(V_FLOAT.l1_norm(), 7.44f64);
-        assert_approx_eq!(v.l1_norm(), 7.44f64);
-    }
-
-    #[test]
     fn test_int_center() {
         let v_cent = CsVecI::new(5, vec![0, 2, 4], vec![1, 0, -1]);
         assert_eq!(V_INT.center(), v_cent);
@@ -194,8 +171,8 @@ mod tests {
         let v_emp: CsVecI<i32, usize> = CsVecI::new(8, Vec::new(), Vec::new());
         assert_eq!(V_INT_T.top_n(2, false), v);
         assert_eq!(V_INT_T.top_n(2, true), v);
-        assert_eq!(V_INT_NEG.top_n(2, false), v_neg);
-        assert_eq!(V_INT_NEG.top_n(2, true), v_emp)
+        assert_eq!(V_INT_T.map(|x| -1 * x).top_n(2, false), v_neg);
+        assert_eq!(V_INT_T.map(|x| -1 * x).top_n(2, true), v_emp)
     }
 
     #[test]
@@ -205,8 +182,8 @@ mod tests {
         let v_emp: CsVecI<f64, usize> = CsVecI::new(8, Vec::new(), Vec::new());
         assert_eq!(V_FLOAT_T.top_n(2, false), v);
         assert_eq!(V_FLOAT_T.top_n(2, true), v);
-        assert_eq!(V_FLOAT_NEG.top_n(2, false), v_neg);
-        assert_eq!(V_FLOAT_NEG.top_n(2, true), v_emp)
+        assert_eq!(V_FLOAT_T.map(|x| -1.0 * x).top_n(2, false), v_neg);
+        assert_eq!(V_FLOAT_T.map(|x| -1.0 * x).top_n(2, true), v_emp)
     }
 
     #[test]
@@ -214,7 +191,7 @@ mod tests {
         let v = CsVecI::new(8, vec![2, 5], vec![5, 4]);
         let v_emp: CsVecI<i32, usize> = CsVecI::new(8, Vec::new(), Vec::new());
         assert_eq!(V_INT_T.top_n_positive(2), v);
-        assert_eq!(V_INT_NEG.top_n_positive(2), v_emp)
+        assert_eq!(V_INT_T.map(|x| -1 * x).top_n_positive(2), v_emp)
     }
 
     #[test]
@@ -222,7 +199,7 @@ mod tests {
         let v = CsVecI::new(8, vec![2, 5], vec![5.4, 4.67]);
         let v_emp: CsVecI<f64, usize> = CsVecI::new(8, Vec::new(), Vec::new());
         assert_eq!(V_FLOAT_T.top_n_positive(2), v);
-        assert_eq!(V_FLOAT_NEG.top_n_positive(2), v_emp)
+        assert_eq!(V_FLOAT_T.map(|x| -1.0 * x).top_n_positive(2), v_emp)
     }
 
     #[test]
