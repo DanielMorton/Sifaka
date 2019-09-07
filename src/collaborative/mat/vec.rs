@@ -167,7 +167,7 @@ mod tests {
     #[test]
     fn test_int_top_n() {
         let v = CsVecI::new(8, vec![2, 5], vec![5, 4]);
-        let v_neg =  CsVecI::new(8, vec![0, 3], vec![-1, -2]);
+        let v_neg = CsVecI::new(8, vec![0, 3], vec![-1, -2]);
         let v_emp: CsVecI<i32, usize> = CsVecI::new(8, Vec::new(), Vec::new());
         assert_eq!(V_INT_T.top_n(2, false), v);
         assert_eq!(V_INT_T.top_n(2, true), v);
@@ -178,7 +178,7 @@ mod tests {
     #[test]
     fn test_float_top_n() {
         let v = CsVecI::new(8, vec![2, 5], vec![5.4, 4.67]);
-        let v_neg =  CsVecI::new(8, vec![0, 3], vec![-1.6, -2.718]);
+        let v_neg = CsVecI::new(8, vec![0, 3], vec![-1.6, -2.718]);
         let v_emp: CsVecI<f64, usize> = CsVecI::new(8, Vec::new(), Vec::new());
         assert_eq!(V_FLOAT_T.top_n(2, false), v);
         assert_eq!(V_FLOAT_T.top_n(2, true), v);
