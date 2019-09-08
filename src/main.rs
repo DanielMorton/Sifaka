@@ -28,6 +28,4 @@ fn main() {
     c.data_iter().for_each(|x| print!("{}", x));
     println!();
     r.data_iter().for_each(|x| print!("{}", x))
-
-    //    println!("{}", a.row_avg().sum());
 }
